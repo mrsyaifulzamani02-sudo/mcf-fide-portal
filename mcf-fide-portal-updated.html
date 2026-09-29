@@ -790,10 +790,10 @@
     document.getElementById('backBtn').style.visibility = stepIdx===0 ? "hidden" : "visible";
     document.getElementById('nextBtn').style.display = isRev ? "none" : "inline-block";
     
-    // NEW: Show the Submit button only on the review page
+    // Show the Submit button only on the review page
     document.getElementById('submitAppBtn').style.display = isRev ? "inline-block" : "none";
     
-    // NEW: Always keep the Download button hidden when rendering pages (shown later via click)
+    // Always keep the Download button hidden when rendering pages
     document.getElementById('downloadBtn').style.display = "none";
     
     if(isRev){
@@ -805,16 +805,10 @@
         <div style="background:var(--paper); padding:16px; border:1px solid var(--line); border-radius:3px;">
           <h3 style="margin:0 0 10px; font-family:var(--serif);">${document.getElementById('eventName').value || 'Untitled event'}</h3>
           <p style="margin:0; font-size:13px;"><b>Venue:</b> ${document.getElementById('venue').value} | <b>Pax:</b> ${document.getElementById('pax').value}</p>
-          <p style="margin:6px 0 0; font-size:13px;"><b>Time Control:</b> ${state.timeControl}</p>
-          <p style="margin:6px 0 0; font-size:13px;"><b>Total Fee Due:</b> RM ${computeFee().total}</p>
+          <p style="margin:6px 0 0; font-size:13px;"><b>Time Control:</b> ${typeof state !== 'undefined' ? state.timeControl : ''}</p>
+          <p style="margin:6px 0 0; font-size:13px;"><b>Total Fee Due:</b> RM ${typeof computeFee === 'function' ? computeFee().total : 0}</p>
         </div>`;
     }
-
-    document.getElementById('submitAppBtn').addEventListener('click', function() {
-    this.style.display = 'none'; // Hides Submit
-    document.getElementById('downloadBtn').style.display = 'inline-block'; // Shows PDF button
-    document.getElementById('successMessage').style.display = 'block'; // Shows success text
-});
 }
 
   // Time control dropdown logic
@@ -1083,11 +1077,54 @@
     window._toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
   }
 
+  // ---------------------------------------------------------
+// SUBMIT BUTTON LOGIC (Must sit outside of functions)
+// ---------------------------------------------------------
+document.getElementById('submitAppBtn').addEventListener('click', async function() {
+    // Hide Submit, Show Download & Success Message
+    this.style.display = 'none';
+    document.getElementById('downloadBtn').style.display = 'inline-block';
+    document.getElementById('successMessage').style.display = 'block';
+
+    const msgText = document.getElementById('successMessage').querySelector('p');
+    msgText.innerText = "Saving to database...";
+
+    // Gather all the data safely from your form
+    const dossierData = {
+        eventName: document.getElementById('eventName')?.value || 'Untitled',
+        venue: document.getElementById('venue')?.value || 'Not specified',
+        pax: parseInt(document.getElementById('pax')?.value) || 0,
+        startDate: document.getElementById('dateStart')?.value || '',
+        endDate: document.getElementById('dateEnd')?.value || '',
+        system: document.getElementById('system')?.value || 'Not specified',
+        timeControl: typeof state !== 'undefined' ? state.timeControl : '',
+        totalFee: typeof computeFee === 'function' ? computeFee().total : 0,
+        chiefArbiter: document.getElementById('caName')?.value || 'Not specified',
+        signName: document.getElementById('signName')?.value || 'Not signed',
+        submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    try {
+        // Push the data to a Firestore collection named "dossiers"
+        await db.collection("dossiers").add(dossierData);
+        msgText.innerText = "Your event application has been securely recorded. You may now download your summary.";
+    } catch (error) {
+        console.error("Error saving dossier: ", error);
+        msgText.innerText = "Error saving to database. Please check your connection.";
+        document.getElementById('successMessage').style.borderLeftColor = "red";
+    }
+});
+
   // Initialize UI state
   renderWizard();
   updateAdminCounts();
   renderTable();
 })();
+
+
 </script>
+<!-- FIREBASE LIBRARIES -->
+<script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js"></script>
 </body>
 </html>
