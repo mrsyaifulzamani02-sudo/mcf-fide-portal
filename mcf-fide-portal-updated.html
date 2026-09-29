@@ -726,11 +726,11 @@
       // RM 150 for Round Robin, RM 500 for Swiss (or other systems) in Standard
       base = (system === "Round Robin") ? 150 : 500; 
       perPlayer = 10;
-    } else if (state.timeControl.includes("Rapid")) {
-      // RM 250 base fee for Rapid
+} else if (state.timeControl.includes("Rapid") || state.timeControl.includes("Blitz")) {
+      // RM 250 base fee for Rapid and Blitz
       base = 250; 
       perPlayer = 3;
-    }
+}
 
     return { base, perPlayer, total: base + (perPlayer * pax) };
   }
