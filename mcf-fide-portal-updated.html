@@ -1124,7 +1124,64 @@ document.getElementById('submitAppBtn').addEventListener('click', async function
 
 </script>
 <!-- FIREBASE LIBRARIES -->
+<!-- 1. Load Firebase Libraries FIRST -->
 <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js"></script>
+
+<!-- 2. Your custom script comes SECOND -->
+<!-- 2. Your custom script comes SECOND -->
+<script>
+    // A. INITIALIZE FIREBASE GLOBALLY 
+    const firebaseConfig = {
+        apiKey: "AIzaSyD1TGam7x7DaVq-ZhC5Drx3dNfR9Cmzquo",
+        authDomain: "mcf-fide-portal.firebaseapp.com",
+        projectId: "mcf-fide-portal",
+        storageBucket: "mcf-fide-portal.firebasestorage.app",
+        messagingSenderId: "207429811337",
+        appId: "1:207429811337:web:0ae95296abc1c7856d9a58",
+        measurementId: "G-RMFFS4VLKV"
+    };
+    
+    // Initialize the app
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore(); 
+
+    // B. SUBMIT BUTTON LISTENER (With the actual saving logic)
+    document.getElementById('submitAppBtn').addEventListener('click', async function() {
+        // Hide Submit, Show Download & Success Message
+        this.style.display = 'none';
+        document.getElementById('downloadBtn').style.display = 'inline-block';
+        document.getElementById('successMessage').style.display = 'block';
+
+        const msgText = document.getElementById('successMessage').querySelector('p');
+        msgText.innerText = "Saving to database...";
+
+        // Gather the data
+        const dossierData = {
+            eventName: document.getElementById('eventName')?.value || 'Untitled',
+            venue: document.getElementById('venue')?.value || 'Not specified',
+            pax: parseInt(document.getElementById('pax')?.value) || 0,
+            startDate: document.getElementById('dateStart')?.value || '',
+            endDate: document.getElementById('dateEnd')?.value || '',
+            system: document.getElementById('system')?.value || 'Not specified',
+            timeControl: typeof state !== 'undefined' ? state.timeControl : '',
+            totalFee: typeof computeFee === 'function' ? computeFee().total : 0,
+            chiefArbiter: document.getElementById('caName')?.value || 'Not specified',
+            signName: document.getElementById('signName')?.value || 'Not signed',
+            submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        try {
+            // Push to Firestore
+            await db.collection("dossiers").add(dossierData);
+            msgText.innerText = "Your event application has been securely recorded. You may now download your summary.";
+        } catch (error) {
+            console.error("Error saving dossier: ", error);
+            msgText.innerText = "Error saving to database. Please check your connection.";
+            document.getElementById('successMessage').style.borderLeftColor = "red";
+        }
+    });
+</script>
+
 </body>
 </html>
