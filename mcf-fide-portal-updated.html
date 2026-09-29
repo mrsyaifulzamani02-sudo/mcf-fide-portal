@@ -970,22 +970,69 @@
 });
 
   /* ================== 3. ADMIN PORTAL LOGIC ================== */
-  let tournaments = [
-    { id: "MCF-2026-104", eventName: "Kuala Lumpur Open Chess Championship 2026", orgBody: "KL Chess Association", state: "Kuala Lumpur", system: "Swiss", timeControl: "90m + 30s (Standard)", pax: 150, feeDue: 2000, status: "pending" },
-    { id: "MCF-2026-099", eventName: "Penang Heritage Merdeka Rapid 2026", orgBody: "Penang Chess Association", state: "Penang", system: "Swiss", timeControl: "15m + 10s (Rapid)", pax: 120, feeDue: 610, status: "approved" },
-    { id: "MCF-2026-101", eventName: "Selangor Junior Blitz Challenge", orgBody: "Petaling Jaya Chess Club", state: "Selangor", system: "Round Robin", timeControl: "3m + 2s (Blitz)", pax: 40, feeDue: 350, status: "revision" }
-  ];
   let currentFilter = "all", searchQ = "", selectedId = null;
 
-  function updateAdminCounts(){
-    document.getElementById('cntAll').textContent = tournaments.length;
-    document.getElementById('cntPending').textContent = tournaments.filter(t=>t.status==='pending').length;
-    document.getElementById('cntApproved').textContent = tournaments.filter(t=>t.status==='approved').length;
-    document.getElementById('cntRevision').textContent = tournaments.filter(t=>t.status==='revision').length;
-    const totalFees = tournaments.filter(t=>t.status==='approved').reduce((acc,t)=>acc+t.feeDue, 0);
-    document.getElementById('statFees').textContent = "RM " + totalFees.toLocaleString('en-MY');
-    document.getElementById('statAction').textContent = tournaments.filter(t=>t.status==='pending').length + " Events";
-  }
+  
+  // ---------------------------------------------------------
+// UI UPDATES (Mapped to live Firebase data)
+// ---------------------------------------------------------
+function updateAdminCounts() {
+    // Safely update sidebar counts if elements exist
+    const updateCount = (filter, count) => {
+        const el = document.querySelector(`.nav-item[data-filter="${filter}"] .badge`);
+        if (el) el.innerText = count;
+    };
+
+    updateCount('All Applications', applications.length);
+    updateCount('Pending Review', applications.filter(a => a.status === 'PENDING').length);
+    updateCount('Approved', applications.filter(a => a.status === 'APPROVED').length);
+    updateCount('Revision Req.', applications.filter(a => a.status === 'REVISION REQ.').length);
+    
+    // Update bottom left totals
+    const totalFees = applications.reduce((sum, app) => sum + (Number(app.fee) || 0), 0);
+    const totalEl = document.getElementById('totalFeesAdmin');
+    if (totalEl) totalEl.innerText = 'RM ' + totalFees;
+    
+    const pendingEl = document.getElementById('pendingActionAdmin');
+    if (pendingEl) pendingEl.innerText = applications.filter(a => a.status === 'PENDING').length + ' Events';
+}
+
+
+    // 2. DECLARE GLOBAL VARIABLES HERE (Before any functions run!)
+    let applications = [];
+
+  function listenForAdminDossiers() {
+    // Listen to the "dossiers" collection, ordered by newest submission first
+    db.collection("dossiers").orderBy("submittedAt", "desc").onSnapshot((snapshot) => {
+        
+        applications = []; // Clear the array before pushing fresh data
+        
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            
+            // Map the Firestore document fields to your admin table structure
+            applications.push({
+                id: doc.id,
+                eventName: data.eventName || 'Untitled Event',
+                organizer: data.signName || 'Unknown Organizer',
+                code: 'MCF-' + new Date().getFullYear() + '-PENDING', // Temp code until approved
+                state: data.venue || 'Not specified', // Using venue as the location proxy
+                system: data.system || 'N/A',
+                timeControl: data.timeControl || 'N/A',
+                pax: data.pax || 0,
+                fee: data.totalFee || 0,
+                status: data.status || 'PENDING' // All new apps default to pending
+            });
+        });
+
+        // Trigger your existing UI updates with the new live data
+        if (typeof renderTable === 'function') renderTable();
+        if (typeof updateAdminCounts === 'function') updateAdminCounts();
+        
+    }, (error) => {
+        console.error("Error fetching live dossiers: ", error);
+    });
+}
 
   function getStatusMarkup(status){
     const labels = {
@@ -997,47 +1044,86 @@
     return labels[status] || labels.pending;
   }
 
-  function renderTable(){
-    const tbody = document.getElementById('tableBody');
-    tbody.innerHTML = "";
-    const filtered = tournaments.filter(t => {
-      if(currentFilter !== "all" && t.status !== currentFilter) return false;
-      if(searchQ && !t.eventName.toLowerCase().includes(searchQ.toLowerCase())) return false;
-      return true;
-    });
+  function renderTable() {
+    const tbody = document.querySelector('tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    // 1. Declare the variable and assign it the live data
+    let filteredApps = applications; 
+    
+    // 2. Apply filters if they exist
+    if (typeof currentFilter !== 'undefined' && currentFilter !== 'All Applications') {
+        filteredApps = filteredApps.filter(a => a.status === currentFilter);
+    }
 
-    filtered.forEach(t => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><b>${t.eventName}</b><br><small style="color:var(--ink-soft);">${t.id} • ${t.orgBody}</small></td>
-        <td>${t.state}</td>
-        <td>${t.system}<br><small style="color:var(--ink-soft);">${t.timeControl}</small></td>
-        <td>${t.pax} pax</td>
-        <td><b>RM ${t.feeDue}</b></td>
-        <td>${getStatusMarkup(t.status)}</td>
-      `;
-      tr.addEventListener('click', () => openDrawer(t.id));
-      tbody.appendChild(tr);
+    if (typeof searchQ !== 'undefined' && searchQ.trim() !== '') {
+        const q = searchQ.toLowerCase();
+        filteredApps = filteredApps.filter(a => 
+            a.eventName.toLowerCase().includes(q) || 
+            a.organizer.toLowerCase().includes(q)
+        );
+    }
+    
+    // 3. Loop through the live data and build the table
+    filteredApps.forEach(app => {
+        const tr = document.createElement('tr');
+        
+        let badgeColor = 'var(--text-light)'; 
+        if (app.status === 'PENDING') badgeColor = 'orange';
+        if (app.status === 'APPROVED') badgeColor = 'green';
+        if (app.status === 'REVISION REQ.') badgeColor = 'red';
+
+        tr.innerHTML = `
+            <td>
+                <b style="font-family:var(--serif); font-size:15px;">${app.eventName}</b><br>
+                <span style="font-size:12px; color:var(--text-light);">${app.code} &bull; ${app.organizer}</span>
+            </td>
+            <td>${app.state}</td>
+            <td>
+                ${app.system}<br>
+                <span style="font-size:12px; color:var(--text-light);">${app.timeControl}</span>
+            </td>
+            <td>${app.pax} pax</td>
+            <td><b>RM ${app.fee}</b></td>
+            <td>
+                <span style="background: ${badgeColor}20; color: ${badgeColor}; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; letter-spacing: 0.5px;">
+                    ${app.status}
+                </span>
+            </td>
+        `;
+        
+        // Attach the click listener for the side drawer
+        tr.addEventListener('click', () => openDrawer(app.id));
+        
+        tbody.appendChild(tr);
     });
-  }
+}
+
+
+  
 
   function openDrawer(id){
     selectedId = id;
-    const t = tournaments.find(x => x.id === id);
+    
+    // Change tournaments to applications
+    const t = applications.find(x => x.id === id); 
     if(!t) return;
+    
     document.getElementById('dTitle').textContent = t.eventName;
     document.getElementById('dSubtitle').textContent = "ID: " + t.id;
     document.getElementById('drawerContent').innerHTML = `
-      <div class="section-title">Event Overview</div>
-      <div class="data-grid">
-        <div class="data-item"><span class="label">Organizer</span><span>${t.orgBody}</span></div>
+    <div class="section-title">Event Overview</div>
+    <div class="data-grid">
+        <div class="data-item"><span class="label">Organizer</span><span>${t.organizer}</span></div>
         <div class="data-item"><span class="label">State</span><span>${t.state}</span></div>
         <div class="data-item"><span class="label">System</span><span>${t.system}</span></div>
-        <div class="data-item"><span class="label">Fee Due</span><span>RM ${t.feeDue}</span></div>
-      </div>
+        <div class="data-item"><span class="label">Fee Due</span><span>RM ${t.fee}</span></div>
+    </div>
     `;
     document.getElementById('drawerBack').classList.add('open');
-  }
+}
 
   function closeDrawer(){ document.getElementById('drawerBack').classList.remove('open'); }
   function changeStatus(newStatus){
@@ -1145,6 +1231,102 @@ document.getElementById('submitAppBtn').addEventListener('click', async function
     // Initialize the app
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore(); 
+    // Start fetching data for the Admin view
+    listenForAdminDossiers();
+    
+
+
+// 2. The function that connects to Firestore and pulls the live data
+function listenForAdminDossiers() {
+    db.collection("dossiers").onSnapshot((snapshot) => {
+        
+        applications = []; // Correctly updates the global array
+        
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            
+            applications.push({
+                id: doc.id,
+                eventName: data.eventName || 'Untitled Event',
+                organizer: data.signName || 'Unknown Organizer',
+                code: 'MCF-' + new Date().getFullYear() + '-PENDING',
+                state: data.venue || 'Not specified',
+                system: data.system || 'N/A',
+                timeControl: data.timeControl || 'N/A',
+                pax: data.pax || 0,
+                fee: data.totalFee || 0,
+                status: data.status || 'PENDING' 
+            });
+        });
+
+        console.log("Successfully fetched applications:", applications);
+
+        // Safely trigger the UI updates
+        if (typeof renderTable === 'function') renderTable();
+        if (typeof updateAdminCounts === 'function') updateAdminCounts();
+        
+    }, (error) => {
+        console.error("Error fetching live dossiers: ", error);
+    });
+}
+
+// ---------------------------------------------------------
+// RE-ADDING THE MISSING RENDERTABLE FUNCTION
+// ---------------------------------------------------------
+function renderTable() {
+    const tbody = document.querySelector('tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    let filteredApps = applications; 
+    
+    if (typeof currentFilter !== 'undefined' && currentFilter !== 'All Applications') {
+        filteredApps = filteredApps.filter(a => a.status === currentFilter);
+    }
+
+    if (typeof searchQ !== 'undefined' && searchQ.trim() !== '') {
+        const q = searchQ.toLowerCase();
+        filteredApps = filteredApps.filter(a => 
+            a.eventName.toLowerCase().includes(q) || 
+            a.organizer.toLowerCase().includes(q)
+        );
+    }
+    
+    filteredApps.forEach(app => {
+        const tr = document.createElement('tr');
+        
+        let badgeColor = 'var(--text-light)'; 
+        if (app.status === 'PENDING') badgeColor = 'orange';
+        if (app.status === 'APPROVED') badgeColor = 'green';
+        if (app.status === 'REVISION REQ.') badgeColor = 'red';
+
+        tr.innerHTML = `
+            <td>
+                <b style="font-family:var(--serif); font-size:15px;">${app.eventName}</b><br>
+                <span style="font-size:12px; color:var(--text-light);">${app.code} &bull; ${app.organizer}</span>
+            </td>
+            <td>${app.state}</td>
+            <td>
+                ${app.system}<br>
+                <span style="font-size:12px; color:var(--text-light);">${app.timeControl}</span>
+            </td>
+            <td>${app.pax} pax</td>
+            <td><b>RM ${app.fee}</b></td>
+            <td>
+                <span style="background: ${badgeColor}20; color: ${badgeColor}; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; letter-spacing: 0.5px;">
+                    ${app.status}
+                </span>
+            </td>
+        `;
+        
+        tr.addEventListener('click', () => {
+            if (typeof openDrawer === 'function') openDrawer(app.id);
+        });
+        
+        tbody.appendChild(tr);
+    });
+}
 
     // B. SUBMIT BUTTON LISTENER (With the actual saving logic)
     document.getElementById('submitAppBtn').addEventListener('click', async function() {
@@ -1180,6 +1362,8 @@ document.getElementById('submitAppBtn').addEventListener('click', async function
             msgText.innerText = "Error saving to database. Please check your connection.";
             document.getElementById('successMessage').style.borderLeftColor = "red";
         }
+
+        
     });
 </script>
 
