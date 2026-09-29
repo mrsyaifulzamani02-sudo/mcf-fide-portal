@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCF — Integrated FIDE Portal (Organizer &amp; Admin)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#15120d;
+    --ink-soft:#3a352c;
+    --cream:#f4efe2;
+    --cream-2:#ece4d1;
+    --paper:#fbf8f1;
+    --felt:#1e4b39;
+    --felt-2:#153729;
+    --brass:#b9873f;
+    --brass-light:#e3b872;
+    --claret:#8c2f39;
+    --line: rgba(21,18,13,0.14);
+    --line-soft: rgba(21,18,13,0.08);
+    --shadow: 0 20px 45px -20px rgba(21,18,13,0.35);
+    --radius: 3px;
+    --serif: 'Fraunces', serif;
+    --sans: 'Inter', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;min-height:100vh;}
+  body{
+    background: var(--ink);
+    color: var(--ink);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection{ background: var(--brass-light); color: var(--ink); }
+
+  /* ---------- SPA VIEW CONTROLLER ---------- */
+  .view{ display:none; min-height:100vh; }
+  #view-login.active{ display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; background:radial-gradient(120% 100% at 50% 0%, #1e1a14 0%, var(--ink) 65%); }
+  #view-organizer.active{ display:grid; grid-template-columns: 340px 1fr; }
+  #view-admin.active{ display:grid; grid-template-columns: 280px 1fr; }
+
+  /* ---------- SHARED BRAND & RAIL ELEMENTS ---------- */
+  .rail{
+    background: radial-gradient(120% 100% at 0% 0%, #1c1812 0%, var(--ink) 55%);
+    color: var(--cream);
+    padding: 34px 28px 24px;
+    position: sticky;
+    top:0;
+    height:100vh;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    border-right: 1px solid rgba(244,239,226,0.08);
+  }
+  .crest{ display:flex; align-items:center; gap:12px; margin-bottom: 30px; }
+  .crest-mark{
+    width:38px;height:38px;flex:none;
+    border:1.5px solid var(--brass-light);
+    display:grid;place-items:center;
+    font-family:var(--serif);
+    font-weight:600; font-size:15px;
+    color:var(--brass-light);
+    transform: rotate(45deg);
+  }
+  .crest-mark span{ transform: rotate(-45deg); }
+  .crest-text .eyebrow{
+    font-family: var(--mono); font-size:10px; letter-spacing:.14em;
+    text-transform:uppercase; color: var(--brass-light); margin:0 0 3px;
+  }
+  .crest-text h1{
+    font-family: var(--serif); font-size: 17px; font-weight:600;
+    margin:0; letter-spacing:.01em; line-height:1.2; color:var(--cream);
+  }
+
+  /* ---------- 1. LOGIN GATEWAY ---------- */
+  .gateway{ width: 100%; max-width: 440px; animation: rise .35s ease; }
+  @keyframes rise{ from{ opacity:0; transform: translateY(12px); } to{ opacity:1; transform:none; } }
+  .brand-head{ display:flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 28px; }
+  .brand-head .crest-mark{ width:44px; height:44px; font-size:16px; margin-bottom:18px; box-shadow:0 0 20px rgba(227,184,114,0.15); }
+  .brand-head h1{ font-family: var(--serif); font-size: 26px; font-weight: 600; color: var(--cream); margin: 0; }
+  .card{
+    background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); padding: 32px 34px; position: relative;
+  }
+  .role-label{ font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 8px; text-align: center; display: block; }
+  .seg{ display:flex; border:1px solid var(--line); border-radius: var(--radius); overflow:hidden; margin-bottom:24px; background:var(--cream); }
+  .seg button{
+    flex:1; background:transparent; border:none; padding: 10px 12px;
+    font-family: var(--sans); font-size: 13.5px; font-weight:500; color: var(--ink-soft);
+    cursor:pointer; border-right:1px solid var(--line); transition: background .15s ease, color .15s ease;
+  }
+  .seg button:last-child{ border-right:none; }
+  .seg button.on{ background: var(--felt); color: var(--cream); font-weight:600; }
+  .seg button[data-role="admin"].on{ background: var(--ink); color: var(--brass-light); }
+  .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:18px; }
+  .field label{ font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); display:flex; justify-content:space-between; align-items:center; }
+  .field label .link-opt{ text-transform:none; letter-spacing:0; font-family:var(--sans); font-size:11.5px; color:var(--felt); text-decoration:underline; cursor:pointer; }
+  input[type=text], input[type=password], input[type=number], input[type=date], input[type=email], input[type=tel], input[type=url], select, textarea{
+    font-family: var(--sans); font-size: 14px; color: var(--ink); background: var(--paper);
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; width:100%;
+    transition: border-color .18s ease, box-shadow .18s ease;
+  }
+  input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--felt); box-shadow: 0 0 0 3px rgba(30,75,57,0.14); }
+  .check-row{ display:flex; align-items:center; gap:10px; margin: 4px 0 24px; }
+  .check-row input[type=checkbox]{ width:16px; height:16px; accent-color: var(--felt); cursor:pointer; }
+  .check-row label{ font-family:var(--sans); font-size:13px; color:var(--ink-soft); cursor:pointer; }
+  .btn-submit{
+    width:100%; font-family:var(--sans); font-weight:600; font-size:14px; padding:12px 20px;
+    border-radius:var(--radius); border:1px solid transparent; cursor:pointer; background:var(--felt); color:var(--cream);
+  }
+  .btn-submit:hover{ background:var(--felt-2); }
+  .btn-submit.admin-mode{ background:var(--brass); color:var(--ink); }
+  .btn-submit.admin-mode:hover{ background:var(--brass-light); }
+  .role-notice{ margin-top:20px; padding:12px 14px; border-radius:var(--radius); background:rgba(30,75,57,0.06); border:1px solid rgba(30,75,57,0.18); font-size:12.5px; line-height:1.5; color:var(--ink-soft); display:flex; gap:10px; }
+  .role-notice.admin-notice{ background:rgba(185,135,63,0.1); border-color:rgba(185,135,63,0.35); }
+  .role-notice b{ color:var(--felt); }
+  .role-notice.admin-notice b{ color:#8a6018; }
+  .gateway-foot{ margin-top:24px; text-align:center; font-family:var(--mono); font-size:11px; color:rgba(244,239,226,0.45); }
+  .gateway-foot a{ color:var(--brass-light); text-decoration:underline; cursor:pointer; }
+
+  /* ---------- 2. ORGANIZER PORTAL (WIZARD) ---------- */
+  .rail-lede{ font-size:13px; line-height:1.5; color:rgba(244,239,226,0.65); margin:0 0 24px; padding-bottom:20px; border-bottom:1px solid rgba(244,239,226,0.1); }
+  .board-progress{ margin-bottom:24px; }
+  .board-progress .label{ font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:rgba(244,239,226,0.45); margin:0 0 10px; }
+  .rank{ display:grid; grid-template-columns:repeat(8,1fr); border:1px solid rgba(244,239,226,0.18); }
+  .sq{
+    aspect-ratio:1; display:grid; place-items:center; font-family:var(--mono); font-size:12px;
+    color:rgba(244,239,226,0.35); background:transparent; border:none; border-right:1px solid rgba(244,239,226,0.14); cursor:default;
+  }
+  .sq:last-child{ border-right:none; }
+  .sq.done{ background:var(--felt); color:var(--cream); }
+  .sq.current{ background:var(--brass); color:var(--ink); font-weight:600; }
+  .files{ display:grid; grid-template-columns:repeat(8,1fr); margin-top:6px; }
+  .files span{ text-align:center; font-family:var(--mono); font-size:9.5px; color:rgba(244,239,226,0.3); }
+  .dossier{ margin-top:auto; background:var(--paper); color:var(--ink); padding:18px 16px; border-radius:2px; box-shadow:var(--shadow); }
+  .dossier .tag{ font-family:var(--mono); font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--claret); margin:0 0 8px; }
+  .dossier h2{ font-family:var(--serif); font-size:17px; margin:0 0 10px; color:var(--ink); }
+  .dossier dl{ margin:0; display:grid; gap:6px; }
+  .dossier .row{ display:flex; justify-content:space-between; font-size:11.5px; border-top:1px dashed rgba(21,18,13,0.18); padding-top:6px; }
+  .dossier dt{ color:var(--ink-soft); font-weight:500; }
+  .dossier dd{ margin:0; font-family:var(--mono); font-size:11px; text-align:right; color:var(--ink); }
+  .rail-foot{ margin-top:20px; display:flex; justify-content:space-between; align-items:center; }
+  .rail-foot button{
+    background:none; border:none; font-family:var(--mono); font-size:10.5px; letter-spacing:.08em;
+    text-transform:uppercase; color:rgba(244,239,226,0.55); cursor:pointer; padding:0; text-decoration:underline;
+  }
+  .rail-foot button:hover{ color:var(--brass-light); }
+  .stage{ background:var(--cream); padding:48px 56px; overflow-y:auto; }
+  .stage-inner{ max-width:620px; margin:0 auto; }
+  .step-head{ margin-bottom:28px; }
+  .step-eyebrow{ font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--claret); margin:0 0 8px; display:flex; align-items:center; gap:10px; }
+  .step-eyebrow::after{ content:""; height:1px; flex:1; background:var(--line); }
+  .step-head h2{ font-family:var(--serif); font-size:28px; font-weight:600; margin:0 0 8px; color:var(--ink); }
+  .step-head p{ font-size:14px; line-height:1.55; color:var(--ink-soft); margin:0; }
+  .step{ display:none; animation:rise .35s ease; }
+  .step.active{ display:block; }
+  .field-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px 20px; }
+  .field.full{ grid-column:1 / -1; }
+  .subhead{ font-family:var(--serif); font-size:16px; font-weight:600; color:var(--ink); margin:24px 0 12px; padding-top:18px; border-top:1px solid var(--line); }
+  .combo{ position:relative; }
+  .combo-input{ cursor:pointer; }
+  .combo-panel{ position:absolute; z-index:20; top:calc(100% + 4px); left:0; right:0; background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); max-height:280px; overflow-y:auto; display:none; }
+  .combo-panel.open{ display:block; }
+  .combo-search{ padding:8px; border-bottom:1px solid var(--line-soft); position:sticky; top:0; background:var(--paper); }
+  .combo-group-label{ font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--brass); background:rgba(185,135,63,0.08); padding:6px 12px; position:sticky; top:38px; }
+  .combo-opt{ padding:8px 12px; font-size:13px; cursor:pointer; border-bottom:1px solid var(--line-soft); }
+  .combo-opt:hover{ background:rgba(30,75,57,0.08); color:var(--ink); }
+  .fee-box{ background:linear-gradient(155deg, rgba(185,135,63,0.1), rgba(185,135,63,0.03)); border:1px solid rgba(185,135,63,0.4); border-radius:var(--radius); padding:16px 18px; }
+  .fee-box-label{ font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--brass); margin:0 0 10px; }
+  .fee-row{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; }
+  .fee-total{ display:flex; justify-content:space-between; align-items:baseline; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(185,135,63,0.45); font-family:var(--serif); font-size:20px; font-weight:600; color:var(--ink); }
+  .fee-total span:last-child{ color:var(--felt); }
+  .actions{ display:flex; justify-content:space-between; align-items:center; margin-top:36px; padding-top:20px; border-top:1px solid var(--line); }
+  .btn{ font-family:var(--sans); font-weight:600; font-size:13.5px; padding:10px 18px; border-radius:var(--radius); border:1px solid transparent; cursor:pointer; }
+  .btn-primary{ background:var(--felt); color:var(--cream); }
+  .btn-ghost{ background:transparent; color:var(--ink-soft); border-color:var(--line); }
+  .btn-gold{ background:var(--brass); color:var(--ink); }
+
+  /* ---------- 3. ADMIN APPROVAL DASHBOARD ---------- */
+  .nav-label{ font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:rgba(244,239,226,0.45); margin:10px 0 8px; }
+  .nav-list{ display:flex; flex-direction:column; gap:4px; margin-bottom:24px; }
+  .nav-item{ display:flex; justify-content:space-between; align-items:center; background:transparent; border:none; color:rgba(244,239,226,0.7); padding:9px 12px; border-radius:var(--radius); font-family:var(--sans); font-size:13px; cursor:pointer; text-align:left; }
+  .nav-item:hover{ background:rgba(244,239,226,0.06); color:var(--cream); }
+  .nav-item.active{ background:var(--felt); color:var(--cream); font-weight:500; }
+  .badge{ font-family:var(--mono); font-size:10.5px; background:rgba(244,239,226,0.12); padding:2px 7px; border-radius:10px; }
+  .admin-stats{ margin-top:auto; background:rgba(244,239,226,0.04); border:1px solid rgba(244,239,226,0.1); padding:14px; border-radius:var(--radius); }
+  .stat-row{ display:flex; justify-content:space-between; font-size:12px; color:rgba(244,239,226,0.6); margin-bottom:6px; }
+  .stat-row strong{ color:var(--brass-light); font-family:var(--mono); }
+  .stage-header{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:24px; border-bottom:1px solid var(--line); padding-bottom:16px; }
+  .stage-header h2{ font-family:var(--serif); font-size:24px; margin:0; }
+  .stage-header p{ font-size:13px; color:var(--ink-soft); margin:4px 0 0; }
+  .table-wrap{ background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+  table{ width:100%; border-collapse:collapse; text-align:left; }
+  th{ font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); background:rgba(21,18,13,0.035); padding:12px 16px; border-bottom:1px solid var(--line); }
+  td{ padding:14px 16px; font-size:13px; color:var(--ink); border-bottom:1px solid var(--line-soft); vertical-align:middle; }
+  tr:hover td{ background:rgba(30,75,57,0.04); cursor:pointer; }
+  .status-pill{ display:inline-block; font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.08em; padding:3px 7px; border-radius:2px; font-weight:500; }
+  .status-pending{ background:rgba(185,135,63,0.18); color:#8a6018; }
+  .status-approved{ background:rgba(30,75,57,0.15); color:var(--felt-2); }
+  .status-rejected{ background:rgba(140,47,57,0.15); color:var(--claret); }
+  .status-revision{ background:rgba(58,53,44,0.15); color:var(--ink-soft); }
+
+  /* ---------- REVIEW DRAWER (ADMIN MODAL) ---------- */
+  .drawer-back{ position:fixed; inset:0; background:rgba(21,18,13,0.55); display:none; justify-content:flex-end; z-index:200; }
+  .drawer-back.open{ display:flex; }
+  .drawer{ background:var(--paper); width:580px; max-width:90vw; height:100vh; overflow-y:auto; border-left:1px solid var(--line); box-shadow:-10px 0 30px rgba(0,0,0,0.2); display:flex; flex-direction:column; }
+  .drawer-head{ padding:20px 24px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:flex-start; background:var(--cream); position:sticky; top:0; z-index:10; }
+  .drawer-head h3{ font-family:var(--serif); font-size:20px; margin:0 0 4px; }
+  .drawer-head p{ font-family:var(--mono); font-size:11px; color:var(--ink-soft); margin:0; }
+  .drawer-close{ background:none; border:none; font-size:24px; cursor:pointer; color:var(--ink-soft); line-height:1; }
+  .drawer-body{ padding:24px; flex:1; }
+  .section-title{ font-family:var(--serif); font-size:15px; color:var(--felt); margin:18px 0 8px; padding-bottom:4px; border-bottom:1px solid var(--line); }
+  .data-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; }
+  .data-item .label{ display:block; font-family:var(--mono); font-size:9.5px; text-transform:uppercase; color:rgba(58,53,44,0.55); }
+  .drawer-footer{ padding:16px 24px; border-top:1px solid var(--line); background:var(--cream); display:flex; justify-content:space-between; position:sticky; bottom:0; }
+
+  /* ---------- GLOBAL TOAST ---------- */
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:var(--cream); padding:12px 20px; border-radius:var(--radius); font-size:13px; box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:all .3s ease; display:flex; align-items:center; gap:10px; z-index:300; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast .dot{ width:6px; height:6px; border-radius:50%; background:var(--brass-light); }
+
+  @media (max-width: 880px){
+    #view-organizer.active, #view-admin.active{ grid-template-columns:1fr; }
+    .rail{ height:auto; position:relative; }
+    .dossier{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 1. LOGIN GATEWAY VIEW ================= -->
+<div id="view-login" class="view active">
+  <div class="gateway">
+    <header class="brand-head">
+      <div class="crest-mark"><span>MCF</span></div>
+      <p class="eyebrow">Malaysian Chess Federation</p>
+      <h1>FIDE Portal Access</h1>
+    </header>
+
+    <main class="card">
+      <span class="role-label">Select Account Type</span>
+      <div class="seg" id="roleSeg">
+        <button type="button" class="on" data-role="user">Tournament Organizer</button>
+        <button type="button" data-role="admin">MCF Official / Admin</button>
+      </div>
+
+      <form id="loginForm" novalidate>
+        <div class="field">
+          <label><span id="idLabelText">Email or FIDE ID</span></label>
+          <input type="text" id="idInput" placeholder="e.g. organizer@klchess.my or 5012345" required value="organizer@klchess.my">
+        </div>
+        <div class="field">
+          <label><span>Password</span><span class="link-opt" id="forgotLink">Forgot password?</span></label>
+          <input type="password" id="passInput" placeholder="••••••••••••" required value="mcf2026demo">
+        </div>
+        <div class="check-row">
+          <input type="checkbox" id="rememberMe" checked>
+          <label for="rememberMe">Keep me signed in on this device</label>
+        </div>
+        <button type="submit" class="btn-submit" id="submitBtn">Sign In to Organizer Portal</button>
+      </form>
+
+      <div class="role-notice" id="roleNotice">
+        <span>♟</span>
+        <span id="noticeText"><b>Organizer Portal:</b> Draft and submit FIDE-rated tournament applications, calculate registration fees, and track State Association endorsements.</span>
+      </div>
+    </main>
+
+    <footer class="gateway-foot">
+      <span id="footText">New organizer? <a id="regLink">Register an Organizer Profile</a></span>
+      <p style="margin: 8px 0 0; opacity: 0.7;">© 2026 Malaysian Chess Federation • Kuala Lumpur</p>
+    </footer>
+  </div>
+</div>
+
+<!-- ================= 2. ORGANIZER PORTAL (WIZARD) VIEW ================= -->
+<div id="view-organizer" class="view">
+  <aside class="rail">
+    <div class="crest">
+      <div class="crest-mark"><span>MCF</span></div>
+      <div class="crest-text">
+        <p class="eyebrow">Malaysian Chess Federation</p>
+        <h1>FIDE-Rated Event Application</h1>
+      </div>
+    </div>
+    <p class="rail-lede">Complete this dossier to request MCF endorsement. Eight sections, one rank of the board — fill each square in turn.</p>
+
+    <div class="board-progress">
+      <p class="label">Application rank — step <span id="stepNumLabel">1</span> of 8</p>
+      <div class="rank" id="rank"></div>
+      <div class="files" id="files"></div>
+    </div>
+
+    <div class="dossier" id="dossier">
+      <p class="tag">Tournament dossier · draft</p>
+      <h2 id="dEventName">Untitled event</h2>
+      <dl>
+        <div class="row"><dt>Venue</dt><dd id="dVenue">—</dd></div>
+        <div class="row"><dt>Dates</dt><dd id="dDates">—</dd></div>
+        <div class="row"><dt>System</dt><dd id="dSystem">—</dd></div>
+        <div class="row"><dt>Time control</dt><dd id="dTC">—</dd></div>
+        <div class="row"><dt>Fee due</dt><dd id="dFee">—</dd></div>
+        <div class="row"><dt>Arbiter</dt><dd id="dArbiter">—</dd></div>
+      </dl>
+    </div>
+
+    <div class="rail-foot">
+      <button type="button" class="switchRoleBtn">← Switch Role / Log Out</button>
+      <button type="button" id="resetAll">Reset</button>
+    </div>
+  </aside>
+
+  <main class="stage">
+    <div class="stage-inner">
+      <form id="wizard" novalidate>
+        <!-- STEP 1: EVENT DETAILS -->
+        <section class="step active" data-step="1">
+          <div class="step-head">
+            <p class="step-eyebrow">Section A</p>
+            <h2>Event details</h2>
+            <p>Identifying facts of the tournament — name, location, dates, and structure.</p>
+          </div>
+          <div class="field-grid">
+            <div class="field full"><label>Event name *</label><input type="text" id="eventName" placeholder="e.g. Kuala Lumpur Open 2026"></div>
+            <div class="field"><label>Venue *</label><input type="text" id="venue" placeholder="e.g. City / building"></div>
+            <div class="field"><label>Expected pax *</label><input type="number" id="pax" min="1" placeholder="Pax"></div>
+            <div class="field"><label>Start date *</label><input type="date" id="dateStart"></div>
+            <div class="field"><label>End date *</label><input type="date" id="dateEnd"></div>
+            <div class="field full">
+              <label>Tournament system *</label>
+              <select id="system">
+                <option value="">Select a system…</option>
+                <option>Swiss</option><option>Round Robin</option><option>Knock Out</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 2: FORMAT -->
+        <section class="step" data-step="2">
+          <div class="step-head">
+            <p class="step-eyebrow">Section B</p>
+            <h2>Format &amp; eligibility</h2>
+            <p>Rounds, scheduling, and who is allowed to play.</p>
+          </div>
+          <div class="field-grid">
+            <div class="field"><label>Number of rounds *</label><input type="number" id="rounds" min="1" value="7"></div>
+            <div class="field"><label>Max rating (optional)</label><input type="number" id="maxRating" placeholder="e.g. 1800"></div>
+          </div>
+        </section>
+
+        <!-- STEP 3: TECHNICAL SETUP -->
+        <section class="step" data-step="3">
+          <div class="step-head">
+            <p class="step-eyebrow">Section C</p>
+            <h2>Technical setup</h2>
+            <p>Equipment, pairing software, and tiebreak priority.</p>
+          </div>
+          <div class="field-grid">
+            <div class="field full"><label>Pairing software</label>
+              <select id="software">
+                <option>Swiss Manager</option>
+                <option>Vega</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field full"><label>1st tiebreak *</label><input type="text" id="tb1" placeholder="e.g. Buchholz Cut 1" value="Buchholz Cut 1"></div>
+            <div class="field full"><label>2nd tiebreak</label><input type="text" id="tb2" placeholder="e.g. Buchholz"></div>
+            <div class="field full"><label>3rd tiebreak</label><input type="text" id="tb3" placeholder="e.g. Sonneborn-Berger"></div>
+            <div class="field full"><label>4th tiebreak</label><input type="text" id="tb4" placeholder="e.g. Direct Encounter"></div>
+          </div>
+        </section>
+
+        <!-- STEP 4: TIME CONTROL -->
+        <section class="step" data-step="4">
+          <div class="step-head">
+            <p class="step-eyebrow">Section D</p>
+            <h2>Time control</h2>
+            <p>Select the FIDE-registered time control that applies.</p>
+          </div>
+          <div class="field full combo">
+            <label>Time control *</label>
+            <input type="text" id="tcInput" class="combo-input" placeholder="Click to choose a time control…" readonly>
+            <div class="combo-panel" id="tcPanel">
+              <div class="combo-search"><input type="text" id="tcSearch" placeholder="Search e.g. “blitz”, “15 minutes”"></div>
+              <div id="tcList"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 5: FEES & BUDGET -->
+        <section class="step" data-step="5">
+          <div class="step-head">
+            <p class="step-eyebrow">Section E</p>
+            <h2>Budget, prizes &amp; registration fee</h2>
+            <p>Your MCF registration fee is calculated automatically.</p>
+          </div>
+          <div class="fee-box" id="feeCalc">
+            <p class="fee-box-label">MCF Registration Fee Due</p>
+            <div class="fee-row"><span>Base fee <small id="feeCatSystem"></small></span><span id="feeBase">RM 0</span></div>
+            <div class="fee-row"><span>Per-player fee <small id="feePerPlayerLabel"></small></span><span id="feePerPlayer">RM 0</span></div>
+            <div class="fee-total"><span>Total due</span><span id="feeTotal">RM 0</span></div>
+          </div>
+          <div class="field-grid" style="margin-top:18px;">
+            <div class="field"><label>Total prize fund *</label><input type="number" id="prizeTotal" placeholder="RM" value="1500"></div>
+          </div>
+        </section>
+
+        <!-- STEP 6: OFFICIALS -->
+        <section class="step" data-step="6">
+          <div class="step-head">
+            <p class="step-eyebrow">Section F</p>
+            <h2>Organizing body &amp; officials</h2>
+            <p>The association responsible for the event, and the arbiting team.</p>
+          </div>
+          <div class="field-grid">
+            <div class="field full"><label>Organizing body *</label><input type="text" id="orgBody" placeholder="e.g. KL Chess Association"></div>
+            <div class="field full"><label>State *</label>
+              <select id="orgState"><option>Kuala Lumpur</option><option>Selangor</option><option>Penang</option><option>Johor</option></select>
+            </div>
+            <div class="field"><label>Chief Organizer *</label><input type="text" id="coName" placeholder="Name"></div>
+            <div class="field"><label>Chief Arbiter *</label><input type="text" id="caName" placeholder="Name"></div>
+          </div>
+        </section>
+
+        <!-- STEP 7: OBJECTIVES -->
+        <section class="step" data-step="7">
+          <div class="step-head">
+            <p class="step-eyebrow">Section G</p>
+            <h2>Objectives</h2>
+            <p>What this tournament is meant to achieve.</p>
+          </div>
+          <div class="field-grid">
+            <div class="field full">
+              <label>Objective 1 *</label>
+              <textarea id="obj1" placeholder="Provide FIDE-rated norm opportunities" required>Provide FIDE-rated competition for local chess players.</textarea>
+            </div>
+            <div class="field full">
+              <label>Objective 2 *</label>
+              <textarea id="obj2" placeholder="e.g. Promote chess development among youth players" required></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 8: DECLARATION -->
+        <section class="step" data-step="8">
+          <div class="step-head">
+            <p class="step-eyebrow">Section H</p>
+            <h2>Declaration &amp; signature</h2>
+            <p>Confirm undertakings and sign as the applicant.</p>
+          </div>
+          <div class="field-grid">
+            <div class="field"><label>Signed Name *</label><input type="text" id="signName" placeholder="Full name"></div>
+            <div class="field"><label>Date *</label><input type="date" id="signDate"></div>
+          </div>
+        </section>
+
+        <!-- STEP 9: REVIEW -->
+        <section class="step" data-step="review">
+          <div class="step-head">
+            <p class="step-eyebrow">Checkmate</p>
+            <h2>Review your dossier</h2>
+            <p>Everything is ready for your downloadable summary.</p>
+          </div>
+          <div id="reviewOut"></div>
+        </section>
+
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" id="backBtn">← Back</button>
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="btn btn-gold" id="downloadBtn" style="display:none;">Download PDF Summary</button>
+            <button type="button" class="btn btn-primary" id="nextBtn">Continue →</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+
+<!-- ================= 3. ADMIN APPROVAL DASHBOARD VIEW ================= -->
+<div id="view-admin" class="view">
+  <aside class="rail">
+    <div class="crest">
+      <div class="crest-mark"><span>MCF</span></div>
+      <div class="crest-text">
+        <p class="eyebrow">Malaysian Chess Federation</p>
+        <h1>FIDE Admin Portal</h1>
+      </div>
+    </div>
+
+    <p class="nav-label">Queue Filter</p>
+    <nav class="nav-list" id="navFilter">
+      <button class="nav-item active" data-filter="all">All Applications <span class="badge" id="cntAll">0</span></button>
+      <button class="nav-item" data-filter="pending">Pending Review <span class="badge" id="cntPending">0</span></button>
+      <button class="nav-item" data-filter="approved">Approved <span class="badge" id="cntApproved">0</span></button>
+      <button class="nav-item" data-filter="revision">Revision Req. <span class="badge" id="cntRevision">0</span></button>
+    </nav>
+
+    <div class="admin-stats">
+      <div class="stat-row"><span>Total Fees:</span><strong id="statFees">RM 0</strong></div>
+      <div class="stat-row"><span>Pending Action:</span><strong id="statAction">0 Events</strong></div>
+    </div>
+
+    <div class="rail-foot" style="margin-top:24px;">
+      <button type="button" class="switchRoleBtn">← Switch Role / Log Out</button>
+    </div>
+  </aside>
+
+  <main class="stage" style="padding:40px 48px;">
+    <div class="stage-header">
+      <div>
+        <h2 id="viewTitle">All Applications</h2>
+        <p>Review dossiers, check state endorsements, and assign FIDE rating approval.</p>
+      </div>
+      <div><input type="text" id="searchInput" placeholder="Search event or organizer..." style="width:240px;"></div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Event Name &amp; Code</th>
+            <th>State</th>
+            <th>System / TC</th>
+            <th>Expected Pax</th>
+            <th>Fee Status</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- REVIEW DRAWER (ADMIN MODAL) -->
+<div class="drawer-back" id="drawerBack">
+  <div class="drawer">
+    <div class="drawer-head">
+      <div><h3 id="dTitle">Event Title</h3><p id="dSubtitle">ID: #MCF-2026-000</p></div>
+      <button class="drawer-close" id="drawerClose">×</button>
+    </div>
+    <div class="drawer-body" id="drawerContent"></div>
+    <div class="drawer-footer">
+      <button class="btn btn-ghost" id="btnReject" style="color:var(--claret); border-color:var(--claret);">Reject</button>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-gold" id="btnRevise">Request Revision</button>
+        <button class="btn btn-primary" id="btnApprove">Approve Event</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="dot"></span><span id="toastMsg"></span></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function(){
+  /* ================== SPA VIEW CONTROLLER ================== */
+  function showView(viewId){
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + viewId).classList.add('active');
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+
+  document.querySelectorAll('.switchRoleBtn').forEach(btn => {
+    btn.addEventListener('click', () => showView('login'));
+  });
+
+  /* ================== 1. LOGIN GATEWAY LOGIC ================== */
+  let currentRole = "user";
+  const idLabelText = document.getElementById('idLabelText');
+  const submitBtn = document.getElementById('submitBtn');
+  const roleNotice = document.getElementById('roleNotice');
+  const noticeText = document.getElementById('noticeText');
+  const footText = document.getElementById('footText');
+
+  document.getElementById('roleSeg').querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('roleSeg').querySelectorAll('button').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      currentRole = btn.getAttribute('data-role');
+      applyRoleTheme();
+    });
+  });
+
+  function applyRoleTheme(){
+    if(currentRole === "user"){
+      idLabelText.textContent = "Email or FIDE ID";
+      submitBtn.textContent = "Sign In to Organizer Portal";
+      submitBtn.classList.remove('admin-mode');
+      roleNotice.classList.remove('admin-notice');
+      noticeText.innerHTML = "<b>Organizer Portal:</b> Draft and submit FIDE-rated tournament applications, calculate registration fees, and track State Association endorsements.";
+      footText.innerHTML = 'New organizer? <a id="regLink">Register an Organizer Profile</a>';
+    } else {
+      idLabelText.textContent = "Official MCF Email / Staff ID";
+      submitBtn.textContent = "Sign In to Admin Dashboard";
+      submitBtn.classList.add('admin-mode');
+      roleNotice.classList.add('admin-notice');
+      noticeText.innerHTML = "<b>MCF Administration:</b> Restricted access for Rating Officers, State Arbiters, and Tournament Committee members to review and approve event dossiers.";
+      footText.innerHTML = 'System support required? <a>Contact Secretariat</a>';
+    }
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    showToast("Authenticated as " + (currentRole === "user" ? "Organizer" : "MCF Official") + "...");
+    setTimeout(() => {
+      if(currentRole === "user") showView('organizer');
+      else showView('admin');
+    }, 500);
+  });
+
+  /* ================== 2. ORGANIZER PORTAL LOGIC ================== */
+  const steps = ["1","2","3","4","5","6","7","8","review"];
+  let stepIdx = 0;
+  const state = { timeControl:"" };
+
+  const TC = {
+    "FIDE Blitz": [
+      "10 minutes for game",
+      "3 minutes for game with 2 seconds increment from move 1",
+      "3 minutes for game with 3 seconds increment from move 1",
+      "4 minutes for game with 2 seconds increment from move 1",
+      "4 minutes for game with 3 seconds increment from move 1",
+      "5 minutes for game",
+      "5 minutes for game with 2 seconds increment from move 1",
+      "5 minutes for game with 2 seconds delay from move 1",
+      "5 minutes for game with 3 seconds increment from move 1",
+      "6 minutes for game with 2 seconds increment from move 1",
+      "6 minutes for game with 3 seconds increment from move 1",
+      "7 minutes for game with 2 seconds increment from move 1",
+      "7 minutes for game with 3 seconds increment from move 1",
+      "8 minutes for game with 2 seconds increment from move 1"
+    ],
+    "FIDE Rapid": [
+      "10 minutes for game with 10 seconds increment from move 1",
+      "10 minutes for game with 15 seconds increment from move 1",
+      "10 minutes for game with 5 seconds delay from move 1",
+      "10 minutes for game with 5 seconds increment from move 1",
+      "11 minutes for game",
+      "12 minutes for game",
+      "12 minutes for game with 10 seconds increment from move 1",
+      "12 minutes for game with 3 seconds delay from move 1",
+      "12 minutes for game with 5 seconds increment from move 1",
+      "13 minutes for game with 3 seconds delay from move 1",
+      "13 minutes for game with 5 seconds increment from move 1",
+      "15 minutes for game",
+      "15 minutes for game with 10 seconds delay from move 1",
+      "15 minutes for game with 15 seconds increment from move 1",
+      "15 minutes for game with 3 seconds delay from move 1",
+      "15 minutes for game with 5 seconds increment from move 1",
+      "20 minutes for game",
+      "20 minutes for game with 10 seconds increment from move 1",
+      "20 minutes for game with 15 seconds delay from move 1",
+      "20 minutes for game with 5 seconds increment from move 1",
+      "25 minutes for game with 10 seconds increment from move 1",
+      "25 minutes for game with 15 seconds delay from move 1",
+      "25 minutes for game with 5 seconds increment from move 1",
+      "25 minutes for game",
+      "30 minutes for game",
+      "30 minutes for game with 10 seconds increment from move 1",
+      "45 minutes for game",
+      "59 minutes for game",
+      "8 minutes for game with 4 seconds increment from move 1"
+    ],
+    "FIDE Standard": [
+      "100 min./40mvs and 50 min next 20 mvs and 15min for rest of the game with add. 30sec. starting from mv 1",
+      "105 minutes for first 40 moves and 15 minutes for the rest of the game",
+      "110 minutes for game with 10 sec increment from move 1",
+      "120 minutes for first 40 moves and 15 minutes for the rest of the game with 30sec. incr. from move 40",
+      "120 minutes for first 40 moves and 30 minutes for the rest of the game",
+      "120 minutes for first 40 moves and 30 minutes with 30 seconds increment from move 40",
+      "120 minutes for game",
+      "120 minutes for game with 30 seconds increment from move 1",
+      "150 minutes for the whole game",
+      "30 minutes for game with 30 seconds increment from move 1",
+      "40 minutes for game with 30 seconds increment from move 1",
+      "60 minutes for game",
+      "60 minutes for game with 30 seconds increment from move 1",
+      "65 minutes for game",
+      "70 minutes for game with 30 seconds increment from move 1",
+      "75 minutes with 30 seconds increment from move 1",
+      "90 minutes for first 40 moves and 15 minutes for the rest of the game with 30sec. increment from move 1",
+      "90 minutes for game with 10 seconds increment from move 1",
+      "90 minutes for the whole game",
+      "90 minutes with 30 seconds increment from move 1",
+      "90 min/40moves + 30 min/end +30sec increment per move starting from move 1"
+    ]
+  };
+
+  function renderRail(){
+    const rank = document.getElementById('rank');
+    const files = document.getElementById('files');
+    rank.innerHTML=""; files.innerHTML="";
+    const letters = ["a","b","c","d","e","f","g","h"];
+    for(let i=0; i<8; i++){
+      const b = document.createElement('button');
+      b.type="button";
+      b.className="sq" + (i<stepIdx ? " done":"") + (i===stepIdx ? " current":"");
+      b.textContent = i<stepIdx ? "✓" : (i+1);
+      b.addEventListener('click', () => { if(i<=stepIdx){ stepIdx=i; renderWizard(); } });
+      rank.appendChild(b);
+      const f = document.createElement('span'); f.textContent = letters[i];
+      files.appendChild(f);
+    }
+    document.getElementById('stepNumLabel').textContent = Math.min(stepIdx+1, 8);
+  }
+
+  function computeFee(){
+    const pax = parseInt(document.getElementById('pax').value, 10) || 0;
+    const system = document.getElementById('system').value;
+    let base = 0, perPlayer = 0;
+
+    if (state.timeControl.includes("Standard")) {
+      // RM 150 for Round Robin, RM 500 for Swiss (or other systems) in Standard
+      base = (system === "Round Robin") ? 150 : 500; 
+      perPlayer = 10;
+    } else if (state.timeControl.includes("Rapid")) {
+      // RM 250 base fee for Rapid
+      base = 250; 
+      perPlayer = 3;
+    }
+
+    return { base, perPlayer, total: base + (perPlayer * pax) };
+  }
+
+  function updateDossier(){
+    const name = document.getElementById('eventName').value;
+    document.getElementById('dEventName').textContent = name || "Untitled event";
+    document.getElementById('dVenue').textContent = document.getElementById('venue').value || "—";
+    document.getElementById('dSystem').textContent = document.getElementById('system').value || "—";
+    document.getElementById('dTC').textContent = state.timeControl || "—";
+    document.getElementById('dArbiter').textContent = document.getElementById('caName').value || "—";
+    const fee = computeFee();
+    document.getElementById('dFee').textContent = fee.total ? ("RM " + fee.total) : "—";
+    document.getElementById('feeBase').textContent = "RM " + fee.base;
+    document.getElementById('feePerPlayer').textContent = "RM " + (fee.perPlayer * (parseInt(document.getElementById('pax').value)||0));
+    document.getElementById('feeTotal').textContent = "RM " + fee.total;
+  }
+
+  function renderWizard(){
+    document.querySelectorAll('#wizard .step').forEach(s => s.classList.remove('active'));
+    document.querySelector('#wizard .step[data-step="' + steps[stepIdx] + '"]').classList.add('active');
+    renderRail();
+    updateDossier();
+    const isRev = steps[stepIdx] === "review";
+    document.getElementById('backBtn').style.visibility = stepIdx===0 ? "hidden" : "visible";
+    document.getElementById('nextBtn').style.display = isRev ? "none" : "inline-block";
+    document.getElementById('downloadBtn').style.display = isRev ? "inline-block" : "none";
+    if(isRev){
+      document.getElementById('reviewOut').innerHTML = `
+        <div style="background:var(--paper); padding:16px; border:1px solid var(--line); border-radius:3px;">
+          <h3 style="margin:0 0 10px; font-family:var(--serif);">${document.getElementById('eventName').value || 'Untitled event'}</h3>
+          <p style="margin:0; font-size:13px;"><b>Venue:</b> ${document.getElementById('venue').value} | <b>Pax:</b> ${document.getElementById('pax').value}</p>
+          <p style="margin:6px 0 0; font-size:13px;"><b>Time Control:</b> ${state.timeControl}</p>
+          <p style="margin:6px 0 0; font-size:13px;"><b>Total Fee Due:</b> RM ${computeFee().total}</p>
+        </div>`;
+    }
+  }
+
+  // Time control dropdown logic
+  const tcInput = document.getElementById('tcInput'), tcPanel = document.getElementById('tcPanel'), tcList = document.getElementById('tcList');
+  function renderTC(filter){
+    tcList.innerHTML = "";
+    Object.keys(TC).forEach(group => {
+      const matches = TC[group].filter(o => o.toLowerCase().includes((filter||"").toLowerCase()));
+      if(!matches.length) return;
+      const lbl = document.createElement('div'); lbl.className="combo-group-label"; lbl.textContent=group;
+      tcList.appendChild(lbl);
+      matches.forEach(o => {
+        const d = document.createElement('div'); d.className="combo-opt"; d.textContent=o;
+        d.addEventListener('click', () => {
+          state.timeControl = o + " (" + group + ")";
+          tcInput.value = state.timeControl;
+          tcPanel.classList.remove('open');
+          updateDossier();
+        });
+        tcList.appendChild(d);
+      });
+    });
+  }
+  tcInput.addEventListener('click', () => { tcPanel.classList.add('open'); renderTC(""); });
+  document.addEventListener('click', e => { if(!e.target.closest('.combo')) tcPanel.classList.remove('open'); });
+
+  document.getElementById('nextBtn').addEventListener('click', () => { if(stepIdx < steps.length-1){ stepIdx++; renderWizard(); } });
+  document.getElementById('backBtn').addEventListener('click', () => { if(stepIdx > 0){ stepIdx--; renderWizard(); } });
+  document.getElementById('resetAll').addEventListener('click', () => { if(confirm("Start over?")) location.reload(); });
+
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    if(!window.jspdf){ showToast("PDF library loading..."); return; }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16); doc.text("MALAYSIAN CHESS FEDERATION", 20, 20);
+    doc.setFontSize(12); doc.text("FIDE-Rated Event Application Summary", 20, 28);
+    doc.setFontSize(11);
+    doc.text("Event Name: " + (document.getElementById('eventName').value || "Untitled"), 20, 42);
+    doc.text("Venue: " + document.getElementById('venue').value, 20, 50);
+    doc.text("Expected Pax: " + document.getElementById('pax').value, 20, 58);
+    doc.text("Time Control: " + state.timeControl, 20, 66);
+    doc.text("Total MCF Fee Due: RM " + computeFee().total, 20, 74);
+    doc.save("mcf-application-summary.pdf");
+    showToast("Summary PDF generated!");
+  });
+
+  /* ================== 3. ADMIN PORTAL LOGIC ================== */
+  let tournaments = [
+    { id: "MCF-2026-104", eventName: "Kuala Lumpur Open Chess Championship 2026", orgBody: "KL Chess Association", state: "Kuala Lumpur", system: "Swiss", timeControl: "90m + 30s (Standard)", pax: 150, feeDue: 2000, status: "pending" },
+    { id: "MCF-2026-099", eventName: "Penang Heritage Merdeka Rapid 2026", orgBody: "Penang Chess Association", state: "Penang", system: "Swiss", timeControl: "15m + 10s (Rapid)", pax: 120, feeDue: 610, status: "approved" },
+    { id: "MCF-2026-101", eventName: "Selangor Junior Blitz Challenge", orgBody: "Petaling Jaya Chess Club", state: "Selangor", system: "Round Robin", timeControl: "3m + 2s (Blitz)", pax: 40, feeDue: 350, status: "revision" }
+  ];
+  let currentFilter = "all", searchQ = "", selectedId = null;
+
+  function updateAdminCounts(){
+    document.getElementById('cntAll').textContent = tournaments.length;
+    document.getElementById('cntPending').textContent = tournaments.filter(t=>t.status==='pending').length;
+    document.getElementById('cntApproved').textContent = tournaments.filter(t=>t.status==='approved').length;
+    document.getElementById('cntRevision').textContent = tournaments.filter(t=>t.status==='revision').length;
+    const totalFees = tournaments.filter(t=>t.status==='approved').reduce((acc,t)=>acc+t.feeDue, 0);
+    document.getElementById('statFees').textContent = "RM " + totalFees.toLocaleString('en-MY');
+    document.getElementById('statAction').textContent = tournaments.filter(t=>t.status==='pending').length + " Events";
+  }
+
+  function getStatusMarkup(status){
+    const labels = {
+      pending: '<span class="status-pill status-pending">Pending</span>',
+      approved: '<span class="status-pill status-approved">Approved</span>',
+      revision: '<span class="status-pill status-revision">Revision Req.</span>',
+      rejected: '<span class="status-pill status-rejected">Rejected</span>'
+    };
+    return labels[status] || labels.pending;
+  }
+
+  function renderTable(){
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = "";
+    const filtered = tournaments.filter(t => {
+      if(currentFilter !== "all" && t.status !== currentFilter) return false;
+      if(searchQ && !t.eventName.toLowerCase().includes(searchQ.toLowerCase())) return false;
+      return true;
+    });
+
+    filtered.forEach(t => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><b>${t.eventName}</b><br><small style="color:var(--ink-soft);">${t.id} • ${t.orgBody}</small></td>
+        <td>${t.state}</td>
+        <td>${t.system}<br><small style="color:var(--ink-soft);">${t.timeControl}</small></td>
+        <td>${t.pax} pax</td>
+        <td><b>RM ${t.feeDue}</b></td>
+        <td>${getStatusMarkup(t.status)}</td>
+      `;
+      tr.addEventListener('click', () => openDrawer(t.id));
+      tbody.appendChild(tr);
+    });
+  }
+
+  function openDrawer(id){
+    selectedId = id;
+    const t = tournaments.find(x => x.id === id);
+    if(!t) return;
+    document.getElementById('dTitle').textContent = t.eventName;
+    document.getElementById('dSubtitle').textContent = "ID: " + t.id;
+    document.getElementById('drawerContent').innerHTML = `
+      <div class="section-title">Event Overview</div>
+      <div class="data-grid">
+        <div class="data-item"><span class="label">Organizer</span><span>${t.orgBody}</span></div>
+        <div class="data-item"><span class="label">State</span><span>${t.state}</span></div>
+        <div class="data-item"><span class="label">System</span><span>${t.system}</span></div>
+        <div class="data-item"><span class="label">Fee Due</span><span>RM ${t.feeDue}</span></div>
+      </div>
+    `;
+    document.getElementById('drawerBack').classList.add('open');
+  }
+
+  function closeDrawer(){ document.getElementById('drawerBack').classList.remove('open'); }
+  function changeStatus(newStatus){
+    const t = tournaments.find(x => x.id === selectedId);
+    if(t){
+      t.status = newStatus;
+      showToast("Updated " + t.id + " to " + newStatus.toUpperCase());
+      updateAdminCounts();
+      renderTable();
+      closeDrawer();
+    }
+  }
+
+  document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+  document.getElementById('drawerBack').addEventListener('click', e => { if(e.target.id === 'drawerBack') closeDrawer(); });
+  document.getElementById('btnApprove').addEventListener('click', () => changeStatus('approved'));
+  document.getElementById('btnReject').addEventListener('click', () => changeStatus('rejected'));
+  document.getElementById('btnRevise').addEventListener('click', () => changeStatus('revision'));
+
+  document.querySelectorAll('#navFilter .nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#navFilter .nav-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.getAttribute('data-filter');
+      document.getElementById('viewTitle').textContent = btn.textContent.split('0')[0].trim();
+      renderTable();
+    });
+  });
+
+  document.getElementById('searchInput').addEventListener('input', e => { searchQ = e.target.value; renderTable(); });
+
+  function showToast(msg){
+    const toast = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  // Initialize UI state
+  renderWizard();
+  updateAdminCounts();
+  renderTable();
+})();
+</script>
+</body>
+</html>
