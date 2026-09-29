@@ -422,8 +422,8 @@
             <div class="field full"><label>State *</label>
               <select id="orgState"><option>Kuala Lumpur</option><option>Selangor</option><option>Penang</option><option>Johor</option></select>
             </div>
-            <div class="field"><label>Chief Organizer *</label><input type="text" id="coName" placeholder="Name"></div>
-            <div class="field"><label>Chief Arbiter *</label><input type="text" id="caName" placeholder="Name"></div>
+            <div class="field"><label>Chief Organizer *</label><input type="text" id="chiefOrg" placeholder="Name"></div>
+            <div class="field"><label>Chief Arbiter *</label><input type="text" id="chiefArbiter" placeholder="Name"></div>
           </div>
         </section>
 
@@ -469,7 +469,13 @@
           <div id="reviewOut"></div>
         </section>
 
+        <!-- NEW: Hidden success message -->
+<div id="successMessage" style="display: none; padding: 15px; background: var(--cream-2); border-left: 4px solid green; margin-top: 20px;">
+    <h3 style="color: var(--ink); margin: 0 0 5px 0;">Dossier Submitted Successfully!</h3>
+    <p style="margin: 0; color: var(--ink-soft);">Your event application has been securely recorded. You may now download your summary.</p>
+</div>
         <div class="actions">
+          <button type="button" class="btn btn-primary" id="submitAppBtn" style="display:none;">Submit Dossier</button>
           <button type="button" class="btn btn-ghost" id="backBtn">← Back</button>
           <div style="display:flex; gap:10px;">
             <button type="button" class="btn btn-gold" id="downloadBtn" style="display:none;">Download PDF Summary</button>
@@ -729,30 +735,72 @@
     return { base, perPlayer, total: base + (perPlayer * pax) };
   }
 
-  function updateDossier(){
-    const name = document.getElementById('eventName').value;
+  function updateDossier() {
+    // We add ?. before .value so the script never crashes if an ID is missing
+    const name = document.getElementById('eventName')?.value;
     document.getElementById('dEventName').textContent = name || "Untitled event";
-    document.getElementById('dVenue').textContent = document.getElementById('venue').value || "—";
-    document.getElementById('dSystem').textContent = document.getElementById('system').value || "—";
-    document.getElementById('dTC').textContent = state.timeControl || "—";
-    document.getElementById('dArbiter').textContent = document.getElementById('caName').value || "—";
-    const fee = computeFee();
-    document.getElementById('dFee').textContent = fee.total ? ("RM " + fee.total) : "—";
-    document.getElementById('feeBase').textContent = "RM " + fee.base;
-    document.getElementById('feePerPlayer').textContent = "RM " + (fee.perPlayer * (parseInt(document.getElementById('pax').value)||0));
-    document.getElementById('feeTotal').textContent = "RM " + fee.total;
-  }
+    
+    document.getElementById('dVenue').textContent = document.getElementById('venue')?.value || "—";
+    document.getElementById('dSystem').textContent = document.getElementById('system')?.value || "—";
+    
+    // Safely check time control
+    document.getElementById('dTC').textContent = (typeof state !== 'undefined' && state.timeControl) ? state.timeControl : "—";
+    
+    // Safe check for arbiter
+    document.getElementById('dArbiter').textContent = document.getElementById('caName')?.value || "—";
+    
+    // Safely calculate and output fees
+    if (typeof computeFee === 'function') {
+        const fee = computeFee();
+        const pax = parseInt(document.getElementById('pax')?.value) || 0;
+        
+        document.getElementById('dFee').textContent = fee.total ? ("RM " + fee.total) : "—";
+        
+        // Make sure these elements exist before updating them
+        if (document.getElementById('feeBase')) document.getElementById('feeBase').textContent = "RM " + fee.base;
+        if (document.getElementById('feePerPlayer')) document.getElementById('feePerPlayer').textContent = "RM " + (fee.perPlayer * pax);
+        if (document.getElementById('feeTotal')) document.getElementById('feeTotal').textContent = "RM " + fee.total;
+    }
+
+    // 1. Grab the values from your date inputs safely
+    const start = document.getElementById('dateStart')?.value;
+    const end = document.getElementById('dateEnd')?.value;
+    const datesElement = document.getElementById('dDates');
+
+    // 2. Format and display them in the sidebar
+    if (datesElement) {
+        if (start && end) {
+            datesElement.innerText = `${start} to ${end}`;
+        } else if (start || end) {
+            datesElement.innerText = start || end;
+        } else {
+            datesElement.innerText = '—';
+        }
+    }
+}
 
   function renderWizard(){
     document.querySelectorAll('#wizard .step').forEach(s => s.classList.remove('active'));
     document.querySelector('#wizard .step[data-step="' + steps[stepIdx] + '"]').classList.add('active');
     renderRail();
     updateDossier();
+    
     const isRev = steps[stepIdx] === "review";
+    
     document.getElementById('backBtn').style.visibility = stepIdx===0 ? "hidden" : "visible";
     document.getElementById('nextBtn').style.display = isRev ? "none" : "inline-block";
-    document.getElementById('downloadBtn').style.display = isRev ? "inline-block" : "none";
+    
+    // NEW: Show the Submit button only on the review page
+    document.getElementById('submitAppBtn').style.display = isRev ? "inline-block" : "none";
+    
+    // NEW: Always keep the Download button hidden when rendering pages (shown later via click)
+    document.getElementById('downloadBtn').style.display = "none";
+    
     if(isRev){
+      // Reset the success message in case they click 'Back' and return to the review page
+      const successMsg = document.getElementById('successMessage');
+      if (successMsg) successMsg.style.display = "none";
+
       document.getElementById('reviewOut').innerHTML = `
         <div style="background:var(--paper); padding:16px; border:1px solid var(--line); border-radius:3px;">
           <h3 style="margin:0 0 10px; font-family:var(--serif);">${document.getElementById('eventName').value || 'Untitled event'}</h3>
@@ -761,7 +809,13 @@
           <p style="margin:6px 0 0; font-size:13px;"><b>Total Fee Due:</b> RM ${computeFee().total}</p>
         </div>`;
     }
-  }
+
+    document.getElementById('submitAppBtn').addEventListener('click', function() {
+    this.style.display = 'none'; // Hides Submit
+    document.getElementById('downloadBtn').style.display = 'inline-block'; // Shows PDF button
+    document.getElementById('successMessage').style.display = 'block'; // Shows success text
+});
+}
 
   // Time control dropdown logic
   const tcInput = document.getElementById('tcInput'), tcPanel = document.getElementById('tcPanel'), tcList = document.getElementById('tcList');
@@ -791,21 +845,135 @@
   document.getElementById('backBtn').addEventListener('click', () => { if(stepIdx > 0){ stepIdx--; renderWizard(); } });
   document.getElementById('resetAll').addEventListener('click', () => { if(confirm("Start over?")) location.reload(); });
 
-  document.getElementById('downloadBtn').addEventListener('click', () => {
-    if(!window.jspdf){ showToast("PDF library loading..."); return; }
+  document.getElementById('downloadBtn').addEventListener('click', function() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.setFontSize(16); doc.text("MALAYSIAN CHESS FEDERATION", 20, 20);
-    doc.setFontSize(12); doc.text("FIDE-Rated Event Application Summary", 20, 28);
-    doc.setFontSize(11);
-    doc.text("Event Name: " + (document.getElementById('eventName').value || "Untitled"), 20, 42);
-    doc.text("Venue: " + document.getElementById('venue').value, 20, 50);
-    doc.text("Expected Pax: " + document.getElementById('pax').value, 20, 58);
-    doc.text("Time Control: " + state.timeControl, 20, 66);
-    doc.text("Total MCF Fee Due: RM " + computeFee().total, 20, 74);
-    doc.save("mcf-application-summary.pdf");
-    showToast("Summary PDF generated!");
-  });
+
+    // 1. GATHER DATA
+    const eventName = document.getElementById('eventName').value || 'Untitled Event';
+    const venue = document.getElementById('venue').value || 'Not specified';
+    const pax = document.getElementById('pax').value || 'Not specified';
+    const dateStart = document.getElementById('dateStart').value || 'Not specified';
+    const dateEnd = document.getElementById('dateEnd').value || 'Not specified';
+    const system = document.getElementById('system').value || 'Not specified';
+    
+    // (Update these 3 IDs if they differ in your HTML)
+    const rounds = document.getElementById('rounds') ? document.getElementById('rounds').value : 'Not specified';
+    const orgBody = document.getElementById('orgBody') ? document.getElementById('orgBody').value : 'Not specified';
+    const orgState = document.getElementById('orgState') ? document.getElementById('orgState').value : 'Not specified';
+    const chiefOrg = document.getElementById('chiefOrg') ? document.getElementById('chiefOrg').value : 'Not specified';
+    const chiefArbiter = document.getElementById('chiefArbiter') ? document.getElementById('chiefArbiter').value : 'Not specified';
+    
+    const signName = document.getElementById('signName') ? document.getElementById('signName').value : 'Not signed';
+    const signDate = document.getElementById('signDate') ? document.getElementById('signDate').value : 'Not dated';
+
+    const timeControlInfo = typeof state !== 'undefined' && state.timeControl ? state.timeControl : 'Not specified';
+    const feeInfo = typeof computeFee === 'function' ? 'RM ' + computeFee().total : 'Not calculated';
+    const dateToday = new Date().toLocaleDateString();
+
+    // -------------------------------------------------------------
+    // 2. DRAW THE HEADER 
+    // -------------------------------------------------------------
+    doc.setFillColor(21, 18, 13);
+    doc.rect(0, 0, 210, 45, 'F'); 
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.text("MALAYSIAN CHESS FEDERATION", 105, 22, { align: "center" });
+    
+    doc.setTextColor(185, 135, 49);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(14);
+    doc.text("FIDE-Rated Event Application Summary", 105, 32, { align: "center" });
+
+    // -------------------------------------------------------------
+    // 3. HELPER FUNCTIONS FOR CLEAN LAYOUT
+    // -------------------------------------------------------------
+    let currentY = 55;
+    const labelX = 20;
+    const valueX = 75; // Pushed right to make room for longer labels
+
+    const drawSection = (title) => {
+        // Prevent writing off the bottom of the page
+        if (currentY > 260) { doc.addPage(); currentY = 20; } 
+        
+        doc.setTextColor(40, 40, 40);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text(title, 20, currentY);
+        
+        currentY += 3;
+        doc.setDrawColor(185, 135, 49); // Gold underline
+        doc.setLineWidth(0.5);
+        doc.line(20, currentY, 190, currentY);
+        currentY += 10;
+    };
+
+    const printRow = (label, value) => {
+        if (currentY > 270) { doc.addPage(); currentY = 20; }
+        
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.text(label + ":", labelX, currentY);
+        
+        doc.setFont("helvetica", "normal");
+        const splitValue = doc.splitTextToSize(value, 115); 
+        doc.text(splitValue, valueX, currentY);
+        
+        currentY += (splitValue.length * 6) + 3; 
+    };
+
+    // -------------------------------------------------------------
+    // 4. PRINT THE CONTENT SECTIONS
+    // -------------------------------------------------------------
+    
+    // Section A: Event Details
+    drawSection("Event Details");
+    printRow("Event Name", eventName);
+    printRow("Dates", `${dateStart} to ${dateEnd}`);
+    printRow("Venue", venue);
+    printRow("Tournament System", system);
+    printRow("Number of Rounds", rounds);
+    printRow("Expected Pax", pax.toString());
+    printRow("Time Control", timeControlInfo);
+    printRow("Total Fee Due", feeInfo);
+
+    currentY += 6; 
+
+    // Section B: Organizing Body & Officials
+    drawSection("Organizing Body & Officials");
+    printRow("Organizing Body", orgBody);
+    printRow("State", orgState);
+    printRow("Chief Organizer", chiefOrg);
+    printRow("Chief Arbiter", chiefArbiter);
+
+    currentY += 6;
+
+    // Section C: Declaration
+    drawSection("Declaration");
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(10);
+    doc.setTextColor(80, 80, 80);
+    doc.text("I hereby declare that the information provided in this dossier is true and accurate, and", 20, currentY);
+    currentY += 5;
+    doc.text("I agree to abide by the rules and regulations of the MCF and FIDE.", 20, currentY);
+    currentY += 10;
+    
+    doc.setTextColor(40, 40, 40);
+    printRow("Signed By", signName);
+    printRow("Date Signed", signDate);
+
+    // -------------------------------------------------------------
+    // 5. FOOTER & DOWNLOAD
+    // -------------------------------------------------------------
+    doc.setFontSize(9);
+    doc.setTextColor(150, 150, 150);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Officially generated via MCF Portal on ${dateToday}`, 105, 285, { align: "center" });
+
+    doc.save(`MCF_Dossier_${eventName.replace(/\s+/g, '_')}.pdf`);
+});
 
   /* ================== 3. ADMIN PORTAL LOGIC ================== */
   let tournaments = [
