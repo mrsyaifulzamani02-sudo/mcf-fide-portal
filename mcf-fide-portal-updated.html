@@ -165,7 +165,7 @@
   .nav-item:hover{ background:rgba(244,239,226,0.06); color:var(--cream); }
   .nav-item.active{ background:var(--felt); color:var(--cream); font-weight:500; }
   .badge{ font-family:var(--mono); font-size:10.5px; background:rgba(244,239,226,0.12); padding:2px 7px; border-radius:10px; }
-  .admin-stats{ margin-top:auto; background:rgba(244,239,226,0.04); border:1px solid rgba(244,239,226,0.1); padding:14px; border-radius:var(--radius); }
+  .admin-stats{ margin-top:auto; background:rgba(244,239,226,0.04); border:1px solid rgba(244,239,226,0.1); padding:14px; border-radius:var(--radius); margin-bottom: 16px; }
   .stat-row{ display:flex; justify-content:space-between; font-size:12px; color:rgba(244,239,226,0.6); margin-bottom:6px; }
   .stat-row strong{ color:var(--brass-light); font-family:var(--mono); }
   
@@ -250,13 +250,7 @@
           <label>Password</label>
           <input type="password" id="regPass" placeholder="Minimum 6 characters" required>
         </div>
-        <div class="field">
-          <label>I am a...</label>
-          <select id="regRole">
-            <option value="organizer">Tournament Organizer</option>
-            <option value="admin">MCF Official / Admin</option>
-          </select>
-        </div>
+        <!-- VULNERABILITY REMOVED: Users can no longer select "Admin" here. Default is Organizer. -->
         <button type="submit" class="btn-submit" style="margin-top:10px;">Register Account</button>
       </form>
     </main>
@@ -424,20 +418,15 @@
             <div class="fee-row"><span>Per-player fee</span><span id="feePerPlayer">RM 0</span></div>
             <div class="fee-total"><span>Total due</span><span id="feeTotal">RM 0</span></div>
           </div>
-          <!-- New Manual Payment Instructions -->
           <div style="margin-top:20px; padding:20px; background:rgba(30,75,57,0.06); border:1px solid rgba(30,75,57,0.18); border-radius:3px;">
             <h4 style="margin:0 0 10px; color:var(--felt); font-family:var(--serif);">Payment Instructions</h4>
             <p style="margin:0 0 16px; font-size:13px; color:var(--ink-soft); line-height:1.5;">Please transfer the exact <b>Total Due</b> to the Malaysian Chess Federation account before submitting this dossier.</p>
-            
             <div style="display:flex; justify-content:space-between; border-bottom:1px dashed rgba(30,75,57,0.2); padding-bottom:8px; margin-bottom:8px;">
-              <span style="font-size:12px; color:var(--ink-soft);">Bank Name</span>
-              <b style="font-family:var(--mono); font-size:13px; color:var(--ink);">CIMB Bank Berhad</b>
+              <span style="font-size:12px; color:var(--ink-soft);">Bank Name</span><b style="font-family:var(--mono); font-size:13px; color:var(--ink);">CIMB Bank Berhad</b>
             </div>
             <div style="display:flex; justify-content:space-between; border-bottom:1px dashed rgba(30,75,57,0.2); padding-bottom:8px; margin-bottom:16px;">
-              <span style="font-size:12px; color:var(--ink-soft);">Account Number</span>
-              <b style="font-family:var(--mono); font-size:13px; color:var(--ink);">8000-1234-5678</b>
+              <span style="font-size:12px; color:var(--ink-soft);">Account Number</span><b style="font-family:var(--mono); font-size:13px; color:var(--ink);">8000-1234-5678</b>
             </div>
-
             <div class="field full" style="margin:0;">
               <label>Bank Transaction Reference Number *</label>
               <input type="text" id="paymentRef" placeholder="e.g. CIMB-9876543210" required>
@@ -502,6 +491,13 @@
       <button class="nav-item" data-filter="approved">Approved <span class="badge" id="cntApproved">0</span></button>
       <button class="nav-item" data-filter="revision">Revision Req. <span class="badge" id="cntRevision">0</span></button>
     </nav>
+    
+    <!-- SYSTEM ADMIN MENU -->
+    <p class="nav-label" style="margin-top: 16px;">System Admin</p>
+    <nav class="nav-list">
+      <button class="nav-item" id="btnNavUsers">Manage Users</button>
+    </nav>
+
     <div class="admin-stats">
       <div class="stat-row"><span>Total Fees:</span><strong id="statFees">RM 0</strong></div>
       <div class="stat-row"><span>Pending Action:</span><strong id="statAction">0 Events</strong></div>
@@ -518,16 +514,35 @@
   </aside>
 
   <main class="stage" style="padding:40px 48px;">
-    <div class="stage-header">
-      <div><h2 id="viewTitle">All Applications</h2><p>Review dossiers, check state endorsements, and assign FIDE rating approval.</p></div>
-      <div><input type="text" id="searchInput" placeholder="Search event or organizer..." style="width:240px;"></div>
+    
+    <!-- APPLICATIONS VIEW -->
+    <div id="adminAppsWrap">
+      <div class="stage-header">
+        <div><h2 id="viewTitle">All Applications</h2><p>Review dossiers, check state endorsements, and assign FIDE rating approval.</p></div>
+        <div><input type="text" id="searchInput" placeholder="Search event or organizer..." style="width:240px;"></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Event Name & Code</th><th>State</th><th>System / TC</th><th>Expected Pax</th><th>Fee Status</th><th>Status</th></tr></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Event Name & Code</th><th>State</th><th>System / TC</th><th>Expected Pax</th><th>Fee Status</th><th>Status</th></tr></thead>
-        <tbody id="tableBody"></tbody>
-      </table>
+
+    <!-- USERS VIEW -->
+    <div id="adminUsersWrap" style="display:none;">
+      <div class="stage-header">
+        <div><h2>User Management</h2><p>View all registered users and manage administrator privileges.</p></div>
+        <div><input type="text" id="searchUsers" placeholder="Search by name or email..." style="width:240px;"></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>State</th><th>Role</th><th>Actions</th></tr></thead>
+          <tbody id="tableBodyUsers"></tbody>
+        </table>
+      </div>
     </div>
+
   </main>
 </div>
 
@@ -574,89 +589,64 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// =========================================================
+// !!! IMPORTANT: ADD YOUR REGISTRATION EMAIL HERE !!!
+// This automatically makes you the "Core Admin" when you log in.
+// =========================================================
+const CORE_ADMIN_EMAIL = "put-your-email-here@gmail.com"; 
+
 let applications = [];
+let usersList = [];
 let currentFilterAdmin = "all";
 let currentFilterOrg = "all";
 let searchQ = "";
+let searchUsersQ = "";
 let selectedId = null;
 
 let currentUserProfile = { uid: "", email: "", role: "", name: "", phone: "", state: "" };
-
 let stepIdx = 0;
 const steps = ["1","2","3","4","5","6","7","8","review"];
 const state = { timeControl:"" };
 
-// FULL FIDE TIME CONTROL LIST RESTORED
 const TC = {
     "FIDE Blitz": [
-        "10 minutes for game",
-        "3 minutes for game with 2 seconds increment from move 1",
-        "3 minutes for game with 3 seconds increment from move 1",
-        "4 minutes for game with 2 seconds increment from move 1",
-        "4 minutes for game with 3 seconds increment from move 1",
-        "5 minutes for game",
-        "5 minutes for game with 2 seconds increment from move 1",
-        "5 minutes for game with 2 seconds delay from move 1",
-        "5 minutes for game with 3 seconds increment from move 1",
-        "6 minutes for game with 2 seconds increment from move 1",
-        "6 minutes for game with 3 seconds increment from move 1",
-        "7 minutes for game with 2 seconds increment from move 1",
-        "7 minutes for game with 3 seconds increment from move 1",
-        "8 minutes for game with 2 seconds increment from move 1"
+        "10 minutes for game", "3 minutes for game with 2 seconds increment from move 1",
+        "3 minutes for game with 3 seconds increment from move 1", "4 minutes for game with 2 seconds increment from move 1",
+        "4 minutes for game with 3 seconds increment from move 1", "5 minutes for game",
+        "5 minutes for game with 2 seconds increment from move 1", "5 minutes for game with 2 seconds delay from move 1",
+        "5 minutes for game with 3 seconds increment from move 1", "6 minutes for game with 2 seconds increment from move 1",
+        "6 minutes for game with 3 seconds increment from move 1", "7 minutes for game with 2 seconds increment from move 1",
+        "7 minutes for game with 3 seconds increment from move 1", "8 minutes for game with 2 seconds increment from move 1"
     ],
     "FIDE Rapid": [
-        "10 minutes for game with 10 seconds increment from move 1",
-        "10 minutes for game with 15 seconds increment from move 1",
-        "10 minutes for game with 5 seconds delay from move 1",
-        "10 minutes for game with 5 seconds increment from move 1",
-        "11 minutes for game",
-        "12 minutes for game",
-        "12 minutes for game with 10 seconds increment from move 1",
-        "12 minutes for game with 3 seconds delay from move 1",
-        "12 minutes for game with 5 seconds increment from move 1",
-        "13 minutes for game with 3 seconds delay from move 1",
-        "13 minutes for game with 5 seconds increment from move 1",
-        "15 minutes for game",
-        "15 minutes for game with 10 seconds delay from move 1",
-        "15 minutes for game with 15 seconds increment from move 1",
-        "15 minutes for game with 3 seconds delay from move 1",
-        "15 minutes for game with 5 seconds increment from move 1",
-        "20 minutes for game",
-        "20 minutes for game with 10 seconds increment from move 1",
-        "20 minutes for game with 15 seconds delay from move 1",
-        "20 minutes for game with 5 seconds increment from move 1",
-        "25 minutes for game with 10 seconds increment from move 1",
-        "25 minutes for game with 15 seconds delay from move 1",
-        "25 minutes for game with 5 seconds increment from move 1",
-        "25 minutes for game",
-        "30 minutes for game",
-        "30 minutes for game with 10 seconds increment from move 1",
-        "45 minutes for game",
-        "59 minutes for game",
-        "8 minutes for game with 4 seconds increment from move 1"
+        "10 minutes for game with 10 seconds increment from move 1", "10 minutes for game with 15 seconds increment from move 1",
+        "10 minutes for game with 5 seconds delay from move 1", "10 minutes for game with 5 seconds increment from move 1",
+        "11 minutes for game", "12 minutes for game", "12 minutes for game with 10 seconds increment from move 1",
+        "12 minutes for game with 3 seconds delay from move 1", "12 minutes for game with 5 seconds increment from move 1",
+        "13 minutes for game with 3 seconds delay from move 1", "13 minutes for game with 5 seconds increment from move 1",
+        "15 minutes for game", "15 minutes for game with 10 seconds delay from move 1",
+        "15 minutes for game with 15 seconds increment from move 1", "15 minutes for game with 3 seconds delay from move 1",
+        "15 minutes for game with 5 seconds increment from move 1", "20 minutes for game",
+        "20 minutes for game with 10 seconds increment from move 1", "20 minutes for game with 15 seconds delay from move 1",
+        "20 minutes for game with 5 seconds increment from move 1", "25 minutes for game with 10 seconds increment from move 1",
+        "25 minutes for game with 15 seconds delay from move 1", "25 minutes for game with 5 seconds increment from move 1",
+        "25 minutes for game", "30 minutes for game", "30 minutes for game with 10 seconds increment from move 1",
+        "45 minutes for game", "59 minutes for game", "8 minutes for game with 4 seconds increment from move 1"
     ],
     "FIDE Standard": [
         "100 min./40mvs and 50 min next 20 mvs and 15min for rest of the game with add. 30sec. starting from mv 1",
-        "105 minutes for first 40 moves and 15 minutes for the rest of the game",
-        "110 minutes for game with 10 sec increment from move 1",
+        "105 minutes for first 40 moves and 15 minutes for the rest of the game", "110 minutes for game with 10 sec increment from move 1",
         "120 minutes for first 40 moves and 15 minutes for the rest of the game with 30sec. incr. from move 40",
         "120 minutes for first 40 moves and 30 minutes for the rest of the game",
         "120 minutes for first 40 moves and 30 minutes with 30 seconds increment from move 40",
-        "120 minutes for game",
-        "120 minutes for game with 30 seconds increment from move 1",
-        "150 minutes for the whole game",
-        "30 minutes for game with 30 seconds increment from move 1",
-        "40 minutes for game with 30 seconds increment from move 1",
-        "60 minutes for game",
-        "60 minutes for game with 30 seconds increment from move 1",
-        "65 minutes for game",
-        "70 minutes for game with 30 seconds increment from move 1",
-        "75 minutes with 30 seconds increment from move 1",
+        "120 minutes for game", "120 minutes for game with 30 seconds increment from move 1",
+        "150 minutes for the whole game", "30 minutes for game with 30 seconds increment from move 1",
+        "40 minutes for game with 30 seconds increment from move 1", "60 minutes for game",
+        "60 minutes for game with 30 seconds increment from move 1", "65 minutes for game",
+        "70 minutes for game with 30 seconds increment from move 1", "75 minutes with 30 seconds increment from move 1",
         "90 minutes for first 40 moves and 15 minutes for the rest of the game with 30sec. increment from move 1",
-        "90 minutes for game with 10 seconds increment from move 1",
-        "90 minutes for the whole game",
-        "90 minutes with 30 seconds increment from move 1",
-        "90 min/40moves + 30 min/end +30sec increment per move starting from move 1"
+        "90 minutes for game with 10 seconds increment from move 1", "90 minutes for the whole game",
+        "90 minutes with 30 seconds increment from move 1", "90 min/40moves + 30 min/end +30sec increment per move starting from move 1"
     ]
 };
 
@@ -669,17 +659,22 @@ function showView(viewId){
     window.scrollTo({top:0, behavior:'instant'});
 }
 
-// Listen for Auth State Changes
 auth.onAuthStateChanged(user => {
     if (user) {
         db.collection('users').doc(user.uid).get().then(doc => {
             if(doc.exists) {
                 currentUserProfile = { uid: user.uid, email: user.email, ...doc.data() };
                 
-                // Route to correct dashboard & toggle the admin "Switch View" button
-                if(currentUserProfile.role === 'admin') {
+                // AUTOMATIC CORE ADMIN PROMOTION
+                if (user.email.toLowerCase() === CORE_ADMIN_EMAIL.toLowerCase() && currentUserProfile.role !== 'core_admin') {
+                    db.collection('users').doc(user.uid).update({ role: 'core_admin' });
+                    currentUserProfile.role = 'core_admin';
+                }
+                
+                if(currentUserProfile.role === 'admin' || currentUserProfile.role === 'core_admin') {
                     document.getElementById('btnGoAdminView').style.display = 'block'; 
                     showView('admin');
+                    listenForUsers(); // Fetch user list for the new table
                 } else {
                     document.getElementById('btnGoAdminView').style.display = 'none'; 
                     showView('organizer-dash');
@@ -703,14 +698,17 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     const name = document.getElementById('regName').value;
     const email = document.getElementById('regEmail').value;
     const pass = document.getElementById('regPass').value;
-    const role = document.getElementById('regRole').value;
+    const role = "organizer"; // Default forced role
     const errEl = document.getElementById('regError');
     
     try {
         errEl.style.display = 'none';
         document.getElementById('registerForm').querySelector('.btn-submit').textContent = "Creating...";
         const cred = await auth.createUserWithEmailAndPassword(email, pass);
-        await db.collection('users').doc(cred.user.uid).set({ name: name, role: role, phone: "", state: "" });
+        // Save the email into the document data to allow admin querying later
+        await db.collection('users').doc(cred.user.uid).set({ 
+            name: name, email: email.toLowerCase(), role: role, phone: "", state: "" 
+        });
         showToast("Account created successfully!");
     } catch (error) {
         errEl.textContent = error.message;
@@ -724,7 +722,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const email = document.getElementById('loginEmail').value;
     const pass = document.getElementById('loginPass').value;
     const errEl = document.getElementById('loginError');
-    
     try {
         errEl.style.display = 'none';
         document.getElementById('loginBtn').textContent = "Authenticating...";
@@ -748,9 +745,9 @@ document.querySelectorAll('.btnLogOut').forEach(btn => {
     });
 });
 
-// Admin <-> Organizer View Toggles
 document.getElementById('btnGoOrgView')?.addEventListener('click', () => showView('organizer-dash'));
 document.getElementById('btnGoAdminView')?.addEventListener('click', () => showView('admin'));
+
 
 // =========================================================
 // 3. USER PROFILE MANAGEMENT
@@ -766,7 +763,7 @@ document.querySelectorAll('.btnGoProfile').forEach(btn => {
 });
 
 document.getElementById('btnBackFromProfile').addEventListener('click', () => {
-    if(currentUserProfile.role === 'admin') showView('admin');
+    if(currentUserProfile.role === 'admin' || currentUserProfile.role === 'core_admin') showView('admin');
     else showView('organizer-dash');
 });
 
@@ -774,13 +771,11 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('btnSaveProfile');
     btn.textContent = "Saving...";
-    
     const updates = {
         name: document.getElementById('profName').value,
         phone: document.getElementById('profPhone').value,
         state: document.getElementById('profState').value
     };
-
     try {
         await db.collection('users').doc(currentUserProfile.uid).update(updates);
         currentUserProfile = { ...currentUserProfile, ...updates };
@@ -796,6 +791,101 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
 // =========================================================
 // 4. DATA FETCHING & RENDERING (ADMIN & ORGANIZER)
 // =========================================================
+
+// --- A. USERS LIST (Admin Only) ---
+function listenForUsers() {
+    db.collection("users").onSnapshot((snapshot) => {
+        usersList = [];
+        snapshot.forEach(doc => usersList.push({ id: doc.id, ...doc.data() }));
+        // Alphabetical sort by name
+        usersList.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+        renderUsersTable();
+    }, (error) => console.error("Error fetching users: ", error));
+}
+
+function renderUsersTable() {
+    const tbody = document.getElementById('tableBodyUsers');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    let filtered = usersList;
+    if (searchUsersQ.trim() !== '') {
+        const q = searchUsersQ.toLowerCase();
+        filtered = filtered.filter(u => 
+            (u.name || "").toLowerCase().includes(q) || 
+            (u.email || "").toLowerCase().includes(q)
+        );
+    }
+    
+    filtered.forEach(u => {
+        const tr = document.createElement('tr');
+        
+        let roleBadge = 'ORGANIZER';
+        let badgeColor = 'var(--text-light)';
+        if (u.role === 'admin') { roleBadge = 'ADMIN'; badgeColor = 'orange'; }
+        if (u.role === 'core_admin') { roleBadge = 'CORE ADMIN'; badgeColor = 'red'; }
+
+        // Action logic: Only Core Admin sees buttons. Cannot demote themselves.
+        let actionHtml = '';
+        if (currentUserProfile.role === 'core_admin' && u.email !== currentUserProfile.email) {
+            if (u.role === 'organizer') {
+                actionHtml = `<button class="btn btn-gold btnPromote" data-id="${u.id}" style="padding: 4px 8px; font-size: 11px;">Make Admin</button>`;
+            } else if (u.role === 'admin') {
+                actionHtml = `<button class="btn btn-ghost btnDemote" data-id="${u.id}" style="padding: 4px 8px; font-size: 11px; color:var(--claret); border-color:var(--claret);">Revoke Admin</button>`;
+            }
+        }
+
+        tr.innerHTML = `
+            <td><b>${u.name || 'N/A'}</b></td>
+            <td>${u.email}</td>
+            <td>${u.state || '-'}</td>
+            <td><span style="background:${badgeColor}20; color:${badgeColor}; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold;">${roleBadge}</span></td>
+            <td>${actionHtml || '<span style="color:var(--ink-soft); font-size:12px;">-</span>'}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    // Attach Action Listeners
+    document.querySelectorAll('.btnPromote').forEach(b => b.addEventListener('click', (e) => {
+        db.collection('users').doc(e.target.dataset.id).update({ role: 'admin' });
+        showToast("Promoted to Admin.");
+    }));
+    document.querySelectorAll('.btnDemote').forEach(b => b.addEventListener('click', (e) => {
+        db.collection('users').doc(e.target.dataset.id).update({ role: 'organizer' });
+        showToast("Admin access revoked.");
+    }));
+}
+
+document.getElementById('searchUsers').addEventListener('input', e => { 
+    searchUsersQ = e.target.value; 
+    renderUsersTable(); 
+});
+
+// Admin View Toggles
+document.getElementById('btnNavUsers').addEventListener('click', (e) => {
+    document.querySelectorAll('#navFilter .nav-item').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    document.getElementById('adminAppsWrap').style.display = 'none';
+    document.getElementById('adminUsersWrap').style.display = 'block';
+});
+
+document.querySelectorAll('#navFilter .nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('#navFilter .nav-item').forEach(b => b.classList.remove('active'));
+        document.getElementById('btnNavUsers').classList.remove('active');
+        btn.classList.add('active');
+        
+        document.getElementById('adminAppsWrap').style.display = 'block';
+        document.getElementById('adminUsersWrap').style.display = 'none';
+        
+        currentFilterAdmin = btn.getAttribute('data-filter');
+        document.getElementById('viewTitle').textContent = btn.textContent.split('0')[0].trim();
+        renderAdminTable();
+    });
+});
+
+
+// --- B. DOSSIERS LIST ---
 function listenForDossiers() {
     db.collection("dossiers").orderBy("submittedAt", "desc").onSnapshot((snapshot) => {
         applications = []; 
@@ -816,8 +906,6 @@ function listenForDossiers() {
                 status: data.status || 'PENDING'
             });
         });
-
-        // Always update both tables so they are ready no matter which view the Admin looks at
         updateAdminCounts(); renderAdminTable();
         updateOrgCounts(); renderOrgTable();
     }, (error) => console.error("Error fetching dossiers: ", error));
@@ -829,8 +917,12 @@ function updateAdminCounts() {
     document.getElementById('cntPending').innerText = applications.filter(a => a.status === 'PENDING').length;
     document.getElementById('cntApproved').innerText = applications.filter(a => a.status === 'APPROVED').length;
     document.getElementById('cntRevision').innerText = applications.filter(a => a.status === 'REVISION REQ.').length;
-
-    const totalFees = applications.reduce((sum, app) => sum + (Number(app.fee) || 0), 0);
+    
+    // FILTER: Only sum fees for APPROVED applications
+    const totalFees = applications
+        .filter(a => a.status === 'APPROVED')
+        .reduce((sum, app) => sum + (Number(app.fee) || 0), 0);
+        
     const pendingAction = applications.filter(a => a.status === 'PENDING').length;
     document.getElementById('statFees').innerText = 'RM ' + totalFees;
     document.getElementById('statAction').innerText = pendingAction + ' Events';
@@ -869,6 +961,7 @@ function renderAdminTable() {
         tbody.appendChild(tr);
     });
 }
+document.getElementById('searchInput').addEventListener('input', e => { searchQ = e.target.value; renderAdminTable(); });
 
 // ORGANIZER DASHBOARD
 function updateOrgCounts() {
@@ -908,6 +1001,16 @@ function renderOrgTable() {
     });
 }
 
+document.querySelectorAll('#navFilterOrg .nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('#navFilterOrg .nav-item').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilterOrg = btn.getAttribute('data-filter');
+        document.getElementById('viewTitleOrg').textContent = btn.textContent.split('0')[0].trim();
+        renderOrgTable();
+    });
+});
+
 // DRAWER (Admin Only)
 function openDrawer(id){
     selectedId = id;
@@ -938,6 +1041,12 @@ function changeStatus(newStatus){
         .catch(e => console.error("Update failed:", e));
     }
 }
+document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+document.getElementById('drawerBack').addEventListener('click', e => { if(e.target.id === 'drawerBack') closeDrawer(); });
+document.getElementById('btnApprove').addEventListener('click', () => changeStatus('APPROVED'));
+document.getElementById('btnReject').addEventListener('click', () => changeStatus('REJECTED'));
+document.getElementById('btnRevise').addEventListener('click', () => changeStatus('REVISION REQ.'));
+
 
 // =========================================================
 // 5. WIZARD FORM LOGIC
@@ -1040,9 +1149,6 @@ function showToast(msg){
     window._toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// =========================================================
-// 6. UI EVENT LISTENERS
-// =========================================================
 document.getElementById('btnNewAppDash').addEventListener('click', () => {
     stepIdx = 0;
     document.getElementById('signName').value = currentUserProfile.name || "";
@@ -1050,40 +1156,11 @@ document.getElementById('btnNewAppDash').addEventListener('click', () => {
     renderWizard();
     showView('organizer-wizard');
 });
-
 document.getElementById('btnCancelWizard').addEventListener('click', () => showView('organizer-dash'));
 document.getElementById('tcInput').addEventListener('click', () => { document.getElementById('tcPanel').classList.add('open'); renderTC(""); });
 document.addEventListener('click', e => { if(!e.target.closest('.combo')) document.getElementById('tcPanel').classList.remove('open'); });
 document.getElementById('nextBtn').addEventListener('click', () => { if(stepIdx < steps.length-1){ stepIdx++; renderWizard(); } });
 document.getElementById('backBtn').addEventListener('click', () => { if(stepIdx > 0){ stepIdx--; renderWizard(); } });
-
-// Admin Sidebar
-document.querySelectorAll('#navFilter .nav-item').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('#navFilter .nav-item').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentFilterAdmin = btn.getAttribute('data-filter');
-        document.getElementById('viewTitle').textContent = btn.textContent.split('0')[0].trim();
-        renderAdminTable();
-    });
-});
-
-// Organizer Sidebar
-document.querySelectorAll('#navFilterOrg .nav-item').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('#navFilterOrg .nav-item').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentFilterOrg = btn.getAttribute('data-filter');
-        document.getElementById('viewTitleOrg').textContent = btn.textContent.split('0')[0].trim();
-        renderOrgTable();
-    });
-});
-
-document.getElementById('drawerClose').addEventListener('click', closeDrawer);
-document.getElementById('drawerBack').addEventListener('click', e => { if(e.target.id === 'drawerBack') closeDrawer(); });
-document.getElementById('btnApprove').addEventListener('click', () => changeStatus('APPROVED'));
-document.getElementById('btnReject').addEventListener('click', () => changeStatus('REJECTED'));
-document.getElementById('btnRevise').addEventListener('click', () => changeStatus('REVISION REQ.'));
 
 // DB Submission logic
 document.getElementById('submitAppBtn').addEventListener('click', async function() {
@@ -1137,6 +1214,7 @@ document.getElementById('downloadBtn').addEventListener('click', function() {
     
     const timeControlInfo = typeof state !== 'undefined' && state.timeControl ? state.timeControl : 'Not specified';
     const feeInfo = typeof computeFee === 'function' ? 'RM ' + computeFee().total : 'Not calculated';
+    const paymentRef = document.getElementById('paymentRef') ? document.getElementById('paymentRef').value : 'Not provided';
     const dateToday = new Date().toLocaleDateString();
 
     // 2. DRAW THE HEADER 
@@ -1193,6 +1271,7 @@ document.getElementById('downloadBtn').addEventListener('click', function() {
     printRow("Expected Pax", pax.toString());
     printRow("Time Control", timeControlInfo);
     printRow("Total Fee Due", feeInfo);
+    printRow("Payment Reference", paymentRef);
 
     currentY += 6; 
 
