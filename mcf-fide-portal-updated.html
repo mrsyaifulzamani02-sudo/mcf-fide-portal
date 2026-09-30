@@ -39,9 +39,9 @@
 
   /* ---------- SPA VIEW CONTROLLER ---------- */
   .view{ display:none; min-height:100vh; }
-  #view-login.active{ display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; background:radial-gradient(120% 100% at 50% 0%, #1e1a14 0%, var(--ink) 65%); }
-  #view-organizer-dash.active, #view-admin.active{ display:grid; grid-template-columns: 280px 1fr; }
-  #view-organizer-wizard.active{ display:grid; grid-template-columns: 340px 1fr; }
+  .auth-view.active{ display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; background:radial-gradient(120% 100% at 50% 0%, #1e1a14 0%, var(--ink) 65%); }
+  .dash-view.active{ display:grid; grid-template-columns: 280px 1fr; }
+  .wizard-view.active{ display:grid; grid-template-columns: 340px 1fr; }
 
   /* ---------- SHARED BRAND & RAIL ELEMENTS ---------- */
   .rail{
@@ -76,7 +76,7 @@
     margin:0; letter-spacing:.01em; line-height:1.2; color:var(--cream);
   }
 
-  /* ---------- 1. LOGIN GATEWAY ---------- */
+  /* ---------- AUTHENTICATION VIEWS ---------- */
   .gateway{ width: 100%; max-width: 440px; animation: rise .35s ease; }
   @keyframes rise{ from{ opacity:0; transform: translateY(12px); } to{ opacity:1; transform:none; } }
   .brand-head{ display:flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 28px; }
@@ -86,43 +86,26 @@
     background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius);
     box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); padding: 32px 34px; position: relative;
   }
-  .role-label{ font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 8px; text-align: center; display: block; }
-  .seg{ display:flex; border:1px solid var(--line); border-radius: var(--radius); overflow:hidden; margin-bottom:24px; background:var(--cream); }
-  .seg button{
-    flex:1; background:transparent; border:none; padding: 10px 12px;
-    font-family: var(--sans); font-size: 13.5px; font-weight:500; color: var(--ink-soft);
-    cursor:pointer; border-right:1px solid var(--line); transition: background .15s ease, color .15s ease;
-  }
-  .seg button:last-child{ border-right:none; }
-  .seg button.on{ background: var(--felt); color: var(--cream); font-weight:600; }
-  .seg button[data-role="admin"].on{ background: var(--ink); color: var(--brass-light); }
   .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:18px; }
   .field label{ font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); display:flex; justify-content:space-between; align-items:center; }
   .field label .link-opt{ text-transform:none; letter-spacing:0; font-family:var(--sans); font-size:11.5px; color:var(--felt); text-decoration:underline; cursor:pointer; }
-  input[type=text], input[type=password], input[type=number], input[type=date], select, textarea{
+  input[type=text], input[type=password], input[type=number], input[type=date], input[type=email], input[type=tel], select, textarea{
     font-family: var(--sans); font-size: 14px; color: var(--ink); background: var(--paper);
     border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; width:100%;
     transition: border-color .18s ease, box-shadow .18s ease;
   }
   input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--felt); box-shadow: 0 0 0 3px rgba(30,75,57,0.14); }
-  .check-row{ display:flex; align-items:center; gap:10px; margin: 4px 0 24px; }
-  .check-row input[type=checkbox]{ width:16px; height:16px; accent-color: var(--felt); cursor:pointer; }
-  .check-row label{ font-family:var(--sans); font-size:13px; color:var(--ink-soft); cursor:pointer; }
+  input:disabled { background: rgba(0,0,0,0.03); color: var(--ink-soft); cursor: not-allowed; }
   .btn-submit{
     width:100%; font-family:var(--sans); font-weight:600; font-size:14px; padding:12px 20px;
     border-radius:var(--radius); border:1px solid transparent; cursor:pointer; background:var(--felt); color:var(--cream);
   }
   .btn-submit:hover{ background:var(--felt-2); }
-  .btn-submit.admin-mode{ background:var(--brass); color:var(--ink); }
-  .btn-submit.admin-mode:hover{ background:var(--brass-light); }
-  .role-notice{ margin-top:20px; padding:12px 14px; border-radius:var(--radius); background:rgba(30,75,57,0.06); border:1px solid rgba(30,75,57,0.18); font-size:12.5px; line-height:1.5; color:var(--ink-soft); display:flex; gap:10px; }
-  .role-notice.admin-notice{ background:rgba(185,135,63,0.1); border-color:rgba(185,135,63,0.35); }
-  .role-notice b{ color:var(--felt); }
-  .role-notice.admin-notice b{ color:#8a6018; }
   .gateway-foot{ margin-top:24px; text-align:center; font-family:var(--mono); font-size:11px; color:rgba(244,239,226,0.45); }
   .gateway-foot a{ color:var(--brass-light); text-decoration:underline; cursor:pointer; }
+  .form-error { color: var(--claret); font-size: 12px; margin-bottom: 12px; text-align: center; display: none; }
 
-  /* ---------- 2. ORGANIZER WIZARD ---------- */
+  /* ---------- WIZARD COMPONENTS ---------- */
   .rail-lede{ font-size:13px; line-height:1.5; color:rgba(244,239,226,0.65); margin:0 0 24px; padding-bottom:20px; border-bottom:1px solid rgba(244,239,226,0.1); }
   .board-progress{ margin-bottom:24px; }
   .board-progress .label{ font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:rgba(244,239,226,0.45); margin:0 0 10px; }
@@ -142,12 +125,6 @@
   .dossier .row{ display:flex; justify-content:space-between; font-size:11.5px; border-top:1px dashed rgba(21,18,13,0.18); padding-top:6px; }
   .dossier dt{ color:var(--ink-soft); font-weight:500; }
   .dossier dd{ margin:0; font-family:var(--mono); font-size:11px; text-align:right; color:var(--ink); }
-  .rail-foot{ margin-top:20px; display:flex; justify-content:space-between; align-items:center; }
-  .rail-foot button{
-    background:none; border:none; font-family:var(--mono); font-size:10.5px; letter-spacing:.08em;
-    text-transform:uppercase; color:rgba(244,239,226,0.55); cursor:pointer; padding:0; text-decoration:underline;
-  }
-  .rail-foot button:hover{ color:var(--brass-light); }
   
   .stage{ background:var(--cream); padding:48px 56px; overflow-y:auto; }
   .stage-inner{ max-width:620px; margin:0 auto; }
@@ -173,12 +150,15 @@
   .fee-row{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; }
   .fee-total{ display:flex; justify-content:space-between; align-items:baseline; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(185,135,63,0.45); font-family:var(--serif); font-size:20px; font-weight:600; color:var(--ink); }
   .actions{ display:flex; justify-content:space-between; align-items:center; margin-top:36px; padding-top:20px; border-top:1px solid var(--line); }
+  
   .btn{ font-family:var(--sans); font-weight:600; font-size:13.5px; padding:10px 18px; border-radius:var(--radius); border:1px solid transparent; cursor:pointer; }
   .btn-primary{ background:var(--felt); color:var(--cream); }
   .btn-ghost{ background:transparent; color:var(--ink-soft); border-color:var(--line); }
   .btn-gold{ background:var(--brass); color:var(--ink); }
+  .btn-logout{ background:transparent; border:none; font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:rgba(244,239,226,0.55); cursor:pointer; padding:0; text-decoration:underline; }
+  .btn-logout:hover{ color:var(--claret); }
 
-  /* ---------- 3. DASHBOARDS (ADMIN & ORGANIZER) ---------- */
+  /* ---------- DASHBOARDS ---------- */
   .nav-label{ font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:rgba(244,239,226,0.45); margin:10px 0 8px; }
   .nav-list{ display:flex; flex-direction:column; gap:4px; margin-bottom:24px; }
   .nav-item{ display:flex; justify-content:space-between; align-items:center; background:transparent; border:none; color:rgba(244,239,226,0.7); padding:9px 12px; border-radius:var(--radius); font-family:var(--sans); font-size:13px; cursor:pointer; text-align:left; }
@@ -188,6 +168,7 @@
   .admin-stats{ margin-top:auto; background:rgba(244,239,226,0.04); border:1px solid rgba(244,239,226,0.1); padding:14px; border-radius:var(--radius); }
   .stat-row{ display:flex; justify-content:space-between; font-size:12px; color:rgba(244,239,226,0.6); margin-bottom:6px; }
   .stat-row strong{ color:var(--brass-light); font-family:var(--mono); }
+  
   .stage-header{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:24px; border-bottom:1px solid var(--line); padding-bottom:16px; }
   .stage-header h2{ font-family:var(--serif); font-size:24px; margin:0; }
   .stage-header p{ font-size:13px; color:var(--ink-soft); margin:4px 0 0; }
@@ -217,49 +198,119 @@
 </head>
 <body>
 
-<!-- ================= 1. LOGIN GATEWAY ================= -->
-<div id="view-login" class="view active">
+<!-- ================= 1. LOGIN VIEW ================= -->
+<div id="view-login" class="view auth-view active">
   <div class="gateway">
     <header class="brand-head">
       <div class="crest-mark"><span>MCF</span></div>
       <p class="eyebrow">Malaysian Chess Federation</p>
-      <h1>FIDE Portal Access</h1>
+      <h1>Portal Access</h1>
     </header>
 
     <main class="card">
-      <span class="role-label">Select Account Type</span>
-      <div class="seg" id="roleSeg">
-        <button type="button" class="on" data-role="user">Tournament Organizer</button>
-        <button type="button" data-role="admin">MCF Official / Admin</button>
-      </div>
+      <div id="loginError" class="form-error"></div>
       <form id="loginForm" novalidate>
         <div class="field">
-          <label><span id="idLabelText">Email or FIDE ID</span></label>
-          <input type="text" id="idInput" placeholder="e.g. organizer@klchess.my" required value="organizer@klchess.my">
+          <label>Email Address</label>
+          <input type="email" id="loginEmail" placeholder="organizer@klchess.my" required>
         </div>
         <div class="field">
-          <label><span>Password</span><span class="link-opt" id="forgotLink">Forgot password?</span></label>
-          <input type="password" id="passInput" placeholder="••••••••••••" required value="mcf2026demo">
+          <label><span>Password</span><span class="link-opt">Forgot password?</span></label>
+          <input type="password" id="loginPass" placeholder="••••••••••••" required>
         </div>
-        <button type="submit" class="btn-submit" id="submitBtn">Sign In to Organizer Portal</button>
+        <button type="submit" class="btn-submit" id="loginBtn">Sign In</button>
       </form>
-      <div class="role-notice" id="roleNotice">
-        <span>♟</span>
-        <span id="noticeText"><b>Organizer Portal:</b> Draft and submit FIDE-rated tournament applications, calculate registration fees, and track State Association endorsements.</span>
-      </div>
     </main>
+    <footer class="gateway-foot">
+      <span>Don't have an account? <a id="goToRegister">Sign Up Here</a></span>
+    </footer>
   </div>
 </div>
 
-<!-- ================= 2. ORGANIZER DASHBOARD ================= -->
-<div id="view-organizer-dash" class="view">
+<!-- ================= 2. REGISTER VIEW ================= -->
+<div id="view-register" class="view auth-view">
+  <div class="gateway">
+    <header class="brand-head">
+      <div class="crest-mark"><span>MCF</span></div>
+      <h1>Create Account</h1>
+    </header>
+
+    <main class="card">
+      <div id="regError" class="form-error"></div>
+      <form id="registerForm" novalidate>
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" id="regName" placeholder="e.g. Ahmad bin Abdullah" required>
+        </div>
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" id="regEmail" placeholder="you@domain.com" required>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="regPass" placeholder="Minimum 6 characters" required>
+        </div>
+        <div class="field">
+          <label>I am a...</label>
+          <select id="regRole">
+            <option value="organizer">Tournament Organizer</option>
+            <option value="admin">MCF Official / Admin</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-submit" style="margin-top:10px;">Register Account</button>
+      </form>
+    </main>
+    <footer class="gateway-foot">
+      <span>Already have an account? <a id="goToLogin">Sign In Here</a></span>
+    </footer>
+  </div>
+</div>
+
+<!-- ================= 3. USER PROFILE VIEW ================= -->
+<div id="view-profile" class="view dash-view">
   <aside class="rail">
     <div class="crest">
       <div class="crest-mark"><span>MCF</span></div>
-      <div class="crest-text">
-        <p class="eyebrow">Malaysian Chess Federation</p>
-        <h1>Organizer Portal</h1>
+      <div class="crest-text"><p class="eyebrow">Settings</p><h1>My Profile</h1></div>
+    </div>
+    <div class="rail-foot" style="margin-top:auto;">
+      <button type="button" class="btn-logout" id="btnBackFromProfile">← Back to Dashboard</button>
+    </div>
+  </aside>
+
+  <main class="stage">
+    <div class="stage-inner">
+      <div class="step-head">
+        <p class="step-eyebrow">Account</p><h2>Personal Information</h2>
+        <p>Update your details. These will be used as defaults for your applications.</p>
       </div>
+      <form id="profileForm" class="card" style="box-shadow:none;">
+        <div id="profError" class="form-error"></div>
+        <div class="field-grid">
+          <div class="field full"><label>Account Email</label><input type="email" id="profEmail" disabled></div>
+          <div class="field"><label>Full Name</label><input type="text" id="profName" required></div>
+          <div class="field"><label>Phone Number</label><input type="tel" id="profPhone" placeholder="e.g. 0123456789"></div>
+          <div class="field full"><label>Default State / Region</label>
+            <select id="profState">
+              <option value="">Select...</option>
+              <option>Kuala Lumpur</option><option>Selangor</option><option>Penang</option><option>Johor</option><option>Perak</option><option>Perlis</option><option>Negeri Sembilan</option><option>Kedah</option><option>Terengganu</option><option>Kelantan</option><option>Pahang</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn btn-primary" id="btnSaveProfile">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+
+<!-- ================= 4. ORGANIZER DASHBOARD ================= -->
+<div id="view-organizer-dash" class="view dash-view">
+  <aside class="rail">
+    <div class="crest">
+      <div class="crest-mark"><span>MCF</span></div>
+      <div class="crest-text"><p class="eyebrow">Malaysian Chess Federation</p><h1>Organizer Portal</h1></div>
     </div>
     
     <div style="margin-top: 10px;">
@@ -273,55 +324,44 @@
       <button class="nav-item" data-filter="approved">Approved <span class="badge" id="cntOrgApproved">0</span></button>
       <button class="nav-item" data-filter="revision">Revision Req. <span class="badge" id="cntOrgRevision">0</span></button>
     </nav>
-
-    <div class="rail-foot" style="margin-top:auto;">
-      <button type="button" class="switchRoleBtn">← Log Out</button>
+    
+    <div class="rail-foot" style="margin-top:auto; display:flex; flex-direction:column; gap:16px; width:100%;">
+      <!-- This button only shows up if the user is actually an Admin exploring the Organizer View -->
+      <button type="button" class="btn btn-ghost" id="btnGoAdminView" style="display:none; width:100%; border-color:var(--brass); color:var(--brass);">← Switch to Admin View</button>
+      
+      <div style="display:flex; justify-content:space-between; width: 100%;">
+        <button type="button" class="btn-logout btnGoProfile">My Profile</button>
+        <button type="button" class="btn-logout btnLogOut">Log Out →</button>
+      </div>
     </div>
   </aside>
 
   <main class="stage" style="padding:40px 48px;">
     <div class="stage-header">
-      <div>
-        <h2 id="viewTitleOrg">All Applications</h2>
-        <p>Track the approval status of your submitted FIDE rating requests.</p>
-      </div>
+      <div><h2 id="viewTitleOrg">All Applications</h2><p>Track the approval status of your submitted FIDE rating requests.</p></div>
     </div>
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr>
-            <th>Event Name & Code</th>
-            <th>State</th>
-            <th>System / TC</th>
-            <th>Expected Pax</th>
-            <th>Fee Status</th>
-            <th>Status</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Event Name & Code</th><th>State</th><th>System / TC</th><th>Expected Pax</th><th>Fee Status</th><th>Status</th></tr></thead>
         <tbody id="tableBodyOrg"></tbody>
       </table>
     </div>
   </main>
 </div>
 
-<!-- ================= 3. ORGANIZER WIZARD (FORM) ================= -->
-<div id="view-organizer-wizard" class="view">
+<!-- ================= 5. ORGANIZER WIZARD (FORM) ================= -->
+<div id="view-organizer-wizard" class="view wizard-view">
   <aside class="rail">
     <div class="crest">
       <div class="crest-mark"><span>MCF</span></div>
-      <div class="crest-text">
-        <p class="eyebrow">Application Wizard</p>
-        <h1>FIDE-Rated Event</h1>
-      </div>
+      <div class="crest-text"><p class="eyebrow">Application Wizard</p><h1>FIDE-Rated Event</h1></div>
     </div>
     <p class="rail-lede">Complete this dossier to request MCF endorsement. Eight sections, one rank of the board.</p>
-
     <div class="board-progress">
       <p class="label">Application rank — step <span id="stepNumLabel">1</span> of 8</p>
       <div class="rank" id="rank"></div>
       <div class="files" id="files"></div>
     </div>
-
     <div class="dossier" id="dossier">
       <p class="tag">Tournament dossier · draft</p>
       <h2 id="dEventName">Untitled event</h2>
@@ -334,34 +374,25 @@
         <div class="row"><dt>Arbiter</dt><dd id="dArbiter">—</dd></div>
       </dl>
     </div>
-
     <div class="rail-foot">
-      <button type="button" id="btnCancelWizard">← Back to Dashboard</button>
+      <button type="button" id="btnCancelWizard" class="btn-logout">← Back to Dashboard</button>
     </div>
   </aside>
 
   <main class="stage">
     <div class="stage-inner">
       <form id="wizard" novalidate>
-        <!-- STEP 1 -->
         <section class="step active" data-step="1">
-          <div class="step-head">
-            <p class="step-eyebrow">Section A</p><h2>Event details</h2>
-          </div>
+          <div class="step-head"><p class="step-eyebrow">Section A</p><h2>Event details</h2></div>
           <div class="field-grid">
             <div class="field full"><label>Event name *</label><input type="text" id="eventName" placeholder="e.g. Kuala Lumpur Open 2026"></div>
             <div class="field"><label>Venue *</label><input type="text" id="venue" placeholder="e.g. City / building"></div>
             <div class="field"><label>Expected pax *</label><input type="number" id="pax" min="1" placeholder="Pax"></div>
             <div class="field"><label>Start date *</label><input type="date" id="dateStart"></div>
             <div class="field"><label>End date *</label><input type="date" id="dateEnd"></div>
-            <div class="field full">
-              <label>Tournament system *</label>
-              <select id="system"><option value="">Select a system…</option><option>Swiss</option><option>Round Robin</option><option>Knock Out</option></select>
-            </div>
+            <div class="field full"><label>Tournament system *</label><select id="system"><option value="">Select a system…</option><option>Swiss</option><option>Round Robin</option><option>Knock Out</option></select></div>
           </div>
         </section>
-
-        <!-- STEP 2 -->
         <section class="step" data-step="2">
           <div class="step-head"><p class="step-eyebrow">Section B</p><h2>Format & eligibility</h2></div>
           <div class="field-grid">
@@ -369,8 +400,6 @@
             <div class="field"><label>Max rating (optional)</label><input type="number" id="maxRating" placeholder="e.g. 1800"></div>
           </div>
         </section>
-
-        <!-- STEP 3 -->
         <section class="step" data-step="3">
           <div class="step-head"><p class="step-eyebrow">Section C</p><h2>Technical setup</h2></div>
           <div class="field-grid">
@@ -378,21 +407,14 @@
             <div class="field full"><label>2nd tiebreak</label><input type="text" id="tb2" placeholder="e.g. Buchholz"></div>
           </div>
         </section>
-
-        <!-- STEP 4 -->
         <section class="step" data-step="4">
           <div class="step-head"><p class="step-eyebrow">Section D</p><h2>Time control</h2></div>
           <div class="field full combo">
             <label>Time control *</label>
             <input type="text" id="tcInput" class="combo-input" placeholder="Click to choose a time control…" readonly>
-            <div class="combo-panel" id="tcPanel">
-              <div class="combo-search"><input type="text" id="tcSearch" placeholder="Search..."></div>
-              <div id="tcList"></div>
-            </div>
+            <div class="combo-panel" id="tcPanel"><div class="combo-search"><input type="text" id="tcSearch" placeholder="Search..."></div><div id="tcList"></div></div>
           </div>
         </section>
-
-        <!-- STEP 5 -->
         <section class="step" data-step="5">
           <div class="step-head"><p class="step-eyebrow">Section E</p><h2>Budget & fees</h2></div>
           <div class="fee-box" id="feeCalc">
@@ -402,27 +424,20 @@
             <div class="fee-total"><span>Total due</span><span id="feeTotal">RM 0</span></div>
           </div>
         </section>
-
-        <!-- STEP 6 -->
         <section class="step" data-step="6">
           <div class="step-head"><p class="step-eyebrow">Section F</p><h2>Officials</h2></div>
           <div class="field-grid">
             <div class="field full"><label>Organizing body *</label><input type="text" id="orgBody" placeholder="e.g. KL Chess Association"></div>
-            <div class="field full"><label>State *</label><select id="orgState"><option>Kuala Lumpur</option><option>Selangor</option><option>Penang</option><option>Johor</option></select></div>
+            <div class="field full"><label>State *</label><select id="orgState"><option>Kuala Lumpur</option><option>Selangor</option><option>Penang</option><option>Johor</option><option>Perak</option><option>Perlis</option><option>Negeri Sembilan</option><option>Kedah</option><option>Terengganu</option><option>Kelantan</option><option>Pahang</option>
+            </select>
             <div class="field"><label>Chief Organizer *</label><input type="text" id="chiefOrg" placeholder="Name"></div>
             <div class="field"><label>Chief Arbiter *</label><input type="text" id="chiefArbiter" placeholder="Name"></div>
           </div>
         </section>
-
-        <!-- STEP 7 -->
         <section class="step" data-step="7">
           <div class="step-head"><p class="step-eyebrow">Section G</p><h2>Objectives</h2></div>
-          <div class="field-grid">
-            <div class="field full"><label>Objective 1 *</label><textarea id="obj1" required>Provide FIDE-rated competition for local chess players.</textarea></div>
-          </div>
+          <div class="field-grid"><div class="field full"><label>Objective 1 *</label><textarea id="obj1" required>Provide FIDE-rated competition for local chess players.</textarea></div></div>
         </section>
-
-        <!-- STEP 8 -->
         <section class="step" data-step="8">
           <div class="step-head"><p class="step-eyebrow">Section H</p><h2>Declaration</h2></div>
           <div class="field-grid">
@@ -430,8 +445,6 @@
             <div class="field"><label>Date *</label><input type="date" id="signDate"></div>
           </div>
         </section>
-
-        <!-- STEP 9: REVIEW -->
         <section class="step" data-step="review">
           <div class="step-head"><p class="step-eyebrow">Checkmate</p><h2>Review your dossier</h2></div>
           <div id="reviewOut"></div>
@@ -455,8 +468,8 @@
   </main>
 </div>
 
-<!-- ================= 4. ADMIN DASHBOARD ================= -->
-<div id="view-admin" class="view">
+<!-- ================= 6. ADMIN DASHBOARD ================= -->
+<div id="view-admin" class="view dash-view">
   <aside class="rail">
     <div class="crest">
       <div class="crest-mark"><span>MCF</span></div>
@@ -473,8 +486,14 @@
       <div class="stat-row"><span>Total Fees:</span><strong id="statFees">RM 0</strong></div>
       <div class="stat-row"><span>Pending Action:</span><strong id="statAction">0 Events</strong></div>
     </div>
-    <div class="rail-foot" style="margin-top:24px;">
-      <button type="button" class="switchRoleBtn">← Log Out</button>
+    
+    <div class="rail-foot" style="margin-top:auto; display:flex; flex-direction:column; gap:16px; width:100%;">
+      <button type="button" class="btn btn-ghost" id="btnGoOrgView" style="width:100%; border-color:rgba(244,239,226,0.3); color:var(--cream);">Switch to Organizer View →</button>
+      
+      <div style="display:flex; justify-content:space-between; width: 100%;">
+        <button type="button" class="btn-logout btnGoProfile">My Profile</button>
+        <button type="button" class="btn-logout btnLogOut">Log Out →</button>
+      </div>
     </div>
   </aside>
 
@@ -485,9 +504,7 @@
     </div>
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr><th>Event Name & Code</th><th>State</th><th>System / TC</th><th>Expected Pax</th><th>Fee Status</th><th>Status</th></tr>
-        </thead>
+        <thead><tr><th>Event Name & Code</th><th>State</th><th>System / TC</th><th>Expected Pax</th><th>Fee Status</th><th>Status</th></tr></thead>
         <tbody id="tableBody"></tbody>
       </table>
     </div>
@@ -517,6 +534,7 @@
 <!-- ================= SCRIPTS ================= -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js"></script>
 
 <script>
@@ -533,6 +551,7 @@ const firebaseConfig = {
     measurementId: "G-RMFFS4VLKV"
 };
 firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 const db = firebase.firestore();
 
 let applications = [];
@@ -540,8 +559,8 @@ let currentFilterAdmin = "all";
 let currentFilterOrg = "all";
 let searchQ = "";
 let selectedId = null;
-let currentRole = "user";
-let currentUserEmail = ""; // Tracks logged in user
+
+let currentUserProfile = { uid: "", email: "", role: "", name: "", phone: "", state: "" };
 
 let stepIdx = 0;
 const steps = ["1","2","3","4","5","6","7","8","review"];
@@ -553,7 +572,140 @@ const TC = {
 };
 
 // =========================================================
-// 2. DATA FETCHING & RENDERING (ADMIN & ORGANIZER)
+// 2. AUTHENTICATION & ROUTING LOGIC
+// =========================================================
+function showView(viewId){
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + viewId).classList.add('active');
+    window.scrollTo({top:0, behavior:'instant'});
+}
+
+// Listen for Auth State Changes
+auth.onAuthStateChanged(user => {
+    if (user) {
+        db.collection('users').doc(user.uid).get().then(doc => {
+            if(doc.exists) {
+                currentUserProfile = { uid: user.uid, email: user.email, ...doc.data() };
+                
+                // Route to correct dashboard & toggle the admin "Switch View" button
+                if(currentUserProfile.role === 'admin') {
+                    document.getElementById('btnGoAdminView').style.display = 'block'; // Unhides the return button for admins in org view
+                    showView('admin');
+                } else {
+                    document.getElementById('btnGoAdminView').style.display = 'none'; // Keeps it hidden for regular organizers
+                    showView('organizer-dash');
+                }
+                listenForDossiers(); 
+            } else {
+                auth.signOut();
+            }
+        });
+    } else {
+        showView('login');
+        currentUserProfile = {}; 
+    }
+});
+
+document.getElementById('goToRegister').addEventListener('click', () => showView('register'));
+document.getElementById('goToLogin').addEventListener('click', () => showView('login'));
+
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('regName').value;
+    const email = document.getElementById('regEmail').value;
+    const pass = document.getElementById('regPass').value;
+    const role = document.getElementById('regRole').value;
+    const errEl = document.getElementById('regError');
+    
+    try {
+        errEl.style.display = 'none';
+        document.getElementById('registerForm').querySelector('.btn-submit').textContent = "Creating...";
+        const cred = await auth.createUserWithEmailAndPassword(email, pass);
+        await db.collection('users').doc(cred.user.uid).set({ name: name, role: role, phone: "", state: "" });
+        showToast("Account created successfully!");
+    } catch (error) {
+        errEl.textContent = error.message;
+        errEl.style.display = 'block';
+        document.getElementById('registerForm').querySelector('.btn-submit').textContent = "Register Account";
+    }
+});
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const pass = document.getElementById('loginPass').value;
+    const errEl = document.getElementById('loginError');
+    
+    try {
+        errEl.style.display = 'none';
+        document.getElementById('loginBtn').textContent = "Authenticating...";
+        await auth.signInWithEmailAndPassword(email, pass);
+        showToast("Welcome back!");
+    } catch (error) {
+        errEl.textContent = "Invalid email or password.";
+        errEl.style.display = 'block';
+        document.getElementById('loginBtn').textContent = "Sign In";
+    }
+});
+
+document.querySelectorAll('.btnLogOut').forEach(btn => {
+    btn.addEventListener('click', () => {
+        auth.signOut();
+        showToast("Logged out successfully.");
+        document.getElementById('loginForm').reset();
+        document.getElementById('loginBtn').textContent = "Sign In";
+        document.getElementById('registerForm').reset();
+        document.getElementById('registerForm').querySelector('.btn-submit').textContent = "Register Account";
+    });
+});
+
+// Admin <-> Organizer View Toggles
+document.getElementById('btnGoOrgView')?.addEventListener('click', () => showView('organizer-dash'));
+document.getElementById('btnGoAdminView')?.addEventListener('click', () => showView('admin'));
+
+// =========================================================
+// 3. USER PROFILE MANAGEMENT
+// =========================================================
+document.querySelectorAll('.btnGoProfile').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.getElementById('profEmail').value = currentUserProfile.email;
+        document.getElementById('profName').value = currentUserProfile.name || "";
+        document.getElementById('profPhone').value = currentUserProfile.phone || "";
+        document.getElementById('profState').value = currentUserProfile.state || "";
+        showView('profile');
+    });
+});
+
+document.getElementById('btnBackFromProfile').addEventListener('click', () => {
+    if(currentUserProfile.role === 'admin') showView('admin');
+    else showView('organizer-dash');
+});
+
+document.getElementById('profileForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnSaveProfile');
+    btn.textContent = "Saving...";
+    
+    const updates = {
+        name: document.getElementById('profName').value,
+        phone: document.getElementById('profPhone').value,
+        state: document.getElementById('profState').value
+    };
+
+    try {
+        await db.collection('users').doc(currentUserProfile.uid).update(updates);
+        currentUserProfile = { ...currentUserProfile, ...updates };
+        showToast("Profile updated successfully!");
+        btn.textContent = "Save Changes";
+    } catch (error) {
+        document.getElementById('profError').textContent = "Failed to update profile.";
+        document.getElementById('profError').style.display = 'block';
+        btn.textContent = "Save Changes";
+    }
+});
+
+// =========================================================
+// 4. DATA FETCHING & RENDERING (ADMIN & ORGANIZER)
 // =========================================================
 function listenForDossiers() {
     db.collection("dossiers").orderBy("submittedAt", "desc").onSnapshot((snapshot) => {
@@ -575,18 +727,13 @@ function listenForDossiers() {
             });
         });
 
-        // Update the screen based on who is logged in
-        if(currentRole === 'user') {
-            updateOrgCounts();
-            renderOrgTable();
-        } else {
-            updateAdminCounts();
-            renderAdminTable();
-        }
+        // Always update both tables so they are ready no matter which view the Admin looks at
+        updateAdminCounts(); renderAdminTable();
+        updateOrgCounts(); renderOrgTable();
     }, (error) => console.error("Error fetching dossiers: ", error));
 }
 
-// ADMIN DASHBOARD RENDERING
+// ADMIN DASHBOARD
 function updateAdminCounts() {
     document.getElementById('cntAll').innerText = applications.length;
     document.getElementById('cntPending').innerText = applications.filter(a => a.status === 'PENDING').length;
@@ -633,11 +780,9 @@ function renderAdminTable() {
     });
 }
 
-// ORGANIZER DASHBOARD RENDERING (Only shows their own events!)
+// ORGANIZER DASHBOARD
 function updateOrgCounts() {
-    // Filter down to only events created by the logged-in email
-    const myApps = applications.filter(a => a.organizerEmail === currentUserEmail);
-    
+    const myApps = applications.filter(a => a.organizerEmail === currentUserProfile.email);
     document.getElementById('cntOrgAll').innerText = myApps.length;
     document.getElementById('cntOrgPending').innerText = myApps.filter(a => a.status === 'PENDING').length;
     document.getElementById('cntOrgApproved').innerText = myApps.filter(a => a.status === 'APPROVED').length;
@@ -649,10 +794,7 @@ function renderOrgTable() {
     if (!tbody) return;
     tbody.innerHTML = '';
     
-    // 1. Filter out everyone else's applications
-    let myApps = applications.filter(a => a.organizerEmail === currentUserEmail);
-    
-    // 2. Apply sidebar filters
+    let myApps = applications.filter(a => a.organizerEmail === currentUserProfile.email);
     if (currentFilterOrg !== 'all') {
         let target = 'PENDING'; 
         if (currentFilterOrg === 'pending') target = 'PENDING';
@@ -672,11 +814,11 @@ function renderOrgTable() {
             <td><b>RM ${app.fee}</b></td>
             <td><span style="background: ${badgeColor}20; color: ${badgeColor}; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; letter-spacing: 0.5px;">${app.status}</span></td>
         `;
-        // Organizers don't get the drawer to approve/reject, so no click listener here!
         tbody.appendChild(tr);
     });
 }
 
+// DRAWER (Admin Only)
 function openDrawer(id){
     selectedId = id;
     const t = applications.find(x => x.id === id); 
@@ -704,31 +846,8 @@ function changeStatus(newStatus){
 }
 
 // =========================================================
-// 3. UI, WIZARD & EVENT LISTENERS
+// 5. WIZARD FORM LOGIC
 // =========================================================
-function showView(viewId){
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById('view-' + viewId).classList.add('active');
-    window.scrollTo({top:0, behavior:'instant'});
-}
-
-function applyRoleTheme(){
-    if(currentRole === "user"){
-        document.getElementById('idLabelText').textContent = "Email or FIDE ID";
-        document.getElementById('submitBtn').textContent = "Sign In to Organizer Portal";
-        document.getElementById('submitBtn').classList.remove('admin-mode');
-        document.getElementById('roleNotice').classList.remove('admin-notice');
-        document.getElementById('noticeText').innerHTML = "<b>Organizer Portal:</b> Draft and submit FIDE-rated tournament applications, calculate registration fees, and track State Association endorsements.";
-    } else {
-        document.getElementById('idLabelText').textContent = "Official MCF Email / Staff ID";
-        document.getElementById('submitBtn').textContent = "Sign In to Admin Dashboard";
-        document.getElementById('submitBtn').classList.add('admin-mode');
-        document.getElementById('roleNotice').classList.add('admin-notice');
-        document.getElementById('noticeText').innerHTML = "<b>MCF Administration:</b> Restricted access for Rating Officers, State Arbiters, and Tournament Committee members to review and approve event dossiers.";
-    }
-}
-
-// Form Wizard Logic
 function renderRail(){
     const rank = document.getElementById('rank'); const files = document.getElementById('files');
     rank.innerHTML=""; files.innerHTML="";
@@ -828,45 +947,17 @@ function showToast(msg){
 }
 
 // =========================================================
-// 4. ATTACH ALL DOM EVENT LISTENERS
+// 6. UI EVENT LISTENERS
 // =========================================================
-document.querySelectorAll('.switchRoleBtn').forEach(btn => btn.addEventListener('click', () => {
-    currentUserEmail = ""; // Clear auth
-    showView('login');
-}));
-
-document.getElementById('roleSeg').querySelectorAll('button').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.getElementById('roleSeg').querySelectorAll('button').forEach(b => b.classList.remove('on'));
-        btn.classList.add('on');
-        currentRole = btn.getAttribute('data-role');
-        applyRoleTheme();
-    });
-});
-
-document.getElementById('loginForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    currentUserEmail = document.getElementById('idInput').value; // Save logged in email
-    
-    showToast("Authenticated as " + (currentRole === "user" ? "Organizer" : "MCF Official") + "...");
-    setTimeout(() => {
-        // Start listening to DB exactly when they log in
-        listenForDossiers(); 
-        if(currentRole === "user") showView('organizer-dash'); // Organizer goes to personal dashboard
-        else showView('admin'); // Admin goes to master dashboard
-    }, 500);
-});
-
-// Organizer Dashboard "New Application" button
 document.getElementById('btnNewAppDash').addEventListener('click', () => {
     stepIdx = 0;
+    document.getElementById('signName').value = currentUserProfile.name || "";
+    document.getElementById('orgState').value = currentUserProfile.state || "Kuala Lumpur";
     renderWizard();
     showView('organizer-wizard');
 });
-// Wizard "Cancel" button
+
 document.getElementById('btnCancelWizard').addEventListener('click', () => showView('organizer-dash'));
-
-
 document.getElementById('tcInput').addEventListener('click', () => { document.getElementById('tcPanel').classList.add('open'); renderTC(""); });
 document.addEventListener('click', e => { if(!e.target.closest('.combo')) document.getElementById('tcPanel').classList.remove('open'); });
 document.getElementById('nextBtn').addEventListener('click', () => { if(stepIdx < steps.length-1){ stepIdx++; renderWizard(); } });
@@ -894,7 +985,6 @@ document.querySelectorAll('#navFilterOrg .nav-item').forEach(btn => {
     });
 });
 
-
 document.getElementById('drawerClose').addEventListener('click', closeDrawer);
 document.getElementById('drawerBack').addEventListener('click', e => { if(e.target.id === 'drawerBack') closeDrawer(); });
 document.getElementById('btnApprove').addEventListener('click', () => changeStatus('APPROVED'));
@@ -918,7 +1008,7 @@ document.getElementById('submitAppBtn').addEventListener('click', async function
         totalFee: computeFee().total,
         chiefArbiter: document.getElementById('chiefArbiter')?.value || 'Not specified',
         signName: document.getElementById('signName')?.value || 'Not signed',
-        organizerEmail: currentUserEmail, // Secretly attaches the user's login email!
+        organizerEmail: currentUserProfile.email,
         submittedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
