@@ -415,13 +415,33 @@
             <div class="combo-panel" id="tcPanel"><div class="combo-search"><input type="text" id="tcSearch" placeholder="Search..."></div><div id="tcList"></div></div>
           </div>
         </section>
+        <!-- STEP 5: BUDGET & PAYMENT -->
         <section class="step" data-step="5">
-          <div class="step-head"><p class="step-eyebrow">Section E</p><h2>Budget & fees</h2></div>
+          <div class="step-head"><p class="step-eyebrow">Section E</p><h2>Budget & Payment</h2></div>
           <div class="fee-box" id="feeCalc">
             <p class="fee-box-label">MCF Registration Fee Due</p>
             <div class="fee-row"><span>Base fee</span><span id="feeBase">RM 0</span></div>
             <div class="fee-row"><span>Per-player fee</span><span id="feePerPlayer">RM 0</span></div>
             <div class="fee-total"><span>Total due</span><span id="feeTotal">RM 0</span></div>
+          </div>
+          <!-- New Manual Payment Instructions -->
+          <div style="margin-top:20px; padding:20px; background:rgba(30,75,57,0.06); border:1px solid rgba(30,75,57,0.18); border-radius:3px;">
+            <h4 style="margin:0 0 10px; color:var(--felt); font-family:var(--serif);">Payment Instructions</h4>
+            <p style="margin:0 0 16px; font-size:13px; color:var(--ink-soft); line-height:1.5;">Please transfer the exact <b>Total Due</b> to the Malaysian Chess Federation account before submitting this dossier.</p>
+            
+            <div style="display:flex; justify-content:space-between; border-bottom:1px dashed rgba(30,75,57,0.2); padding-bottom:8px; margin-bottom:8px;">
+              <span style="font-size:12px; color:var(--ink-soft);">Bank Name</span>
+              <b style="font-family:var(--mono); font-size:13px; color:var(--ink);">CIMB Bank Berhad</b>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px dashed rgba(30,75,57,0.2); padding-bottom:8px; margin-bottom:16px;">
+              <span style="font-size:12px; color:var(--ink-soft);">Account Number</span>
+              <b style="font-family:var(--mono); font-size:13px; color:var(--ink);">8000-1234-5678</b>
+            </div>
+
+            <div class="field full" style="margin:0;">
+              <label>Bank Transaction Reference Number *</label>
+              <input type="text" id="paymentRef" placeholder="e.g. CIMB-9876543210" required>
+            </div>
           </div>
         </section>
         <section class="step" data-step="6">
@@ -565,10 +585,79 @@ let currentUserProfile = { uid: "", email: "", role: "", name: "", phone: "", st
 let stepIdx = 0;
 const steps = ["1","2","3","4","5","6","7","8","review"];
 const state = { timeControl:"" };
+
+// FULL FIDE TIME CONTROL LIST RESTORED
 const TC = {
-    "FIDE Blitz": ["10 minutes for game", "3 minutes for game with 2 seconds increment from move 1", "5 minutes for game"],
-    "FIDE Rapid": ["15 minutes for game", "15 minutes for game with 10 seconds delay from move 1", "25 minutes for game with 10 seconds increment from move 1"],
-    "FIDE Standard": ["90 minutes for first 40 moves and 30 minutes for the rest of the game with 30sec. increment from move 1"]
+    "FIDE Blitz": [
+        "10 minutes for game",
+        "3 minutes for game with 2 seconds increment from move 1",
+        "3 minutes for game with 3 seconds increment from move 1",
+        "4 minutes for game with 2 seconds increment from move 1",
+        "4 minutes for game with 3 seconds increment from move 1",
+        "5 minutes for game",
+        "5 minutes for game with 2 seconds increment from move 1",
+        "5 minutes for game with 2 seconds delay from move 1",
+        "5 minutes for game with 3 seconds increment from move 1",
+        "6 minutes for game with 2 seconds increment from move 1",
+        "6 minutes for game with 3 seconds increment from move 1",
+        "7 minutes for game with 2 seconds increment from move 1",
+        "7 minutes for game with 3 seconds increment from move 1",
+        "8 minutes for game with 2 seconds increment from move 1"
+    ],
+    "FIDE Rapid": [
+        "10 minutes for game with 10 seconds increment from move 1",
+        "10 minutes for game with 15 seconds increment from move 1",
+        "10 minutes for game with 5 seconds delay from move 1",
+        "10 minutes for game with 5 seconds increment from move 1",
+        "11 minutes for game",
+        "12 minutes for game",
+        "12 minutes for game with 10 seconds increment from move 1",
+        "12 minutes for game with 3 seconds delay from move 1",
+        "12 minutes for game with 5 seconds increment from move 1",
+        "13 minutes for game with 3 seconds delay from move 1",
+        "13 minutes for game with 5 seconds increment from move 1",
+        "15 minutes for game",
+        "15 minutes for game with 10 seconds delay from move 1",
+        "15 minutes for game with 15 seconds increment from move 1",
+        "15 minutes for game with 3 seconds delay from move 1",
+        "15 minutes for game with 5 seconds increment from move 1",
+        "20 minutes for game",
+        "20 minutes for game with 10 seconds increment from move 1",
+        "20 minutes for game with 15 seconds delay from move 1",
+        "20 minutes for game with 5 seconds increment from move 1",
+        "25 minutes for game with 10 seconds increment from move 1",
+        "25 minutes for game with 15 seconds delay from move 1",
+        "25 minutes for game with 5 seconds increment from move 1",
+        "25 minutes for game",
+        "30 minutes for game",
+        "30 minutes for game with 10 seconds increment from move 1",
+        "45 minutes for game",
+        "59 minutes for game",
+        "8 minutes for game with 4 seconds increment from move 1"
+    ],
+    "FIDE Standard": [
+        "100 min./40mvs and 50 min next 20 mvs and 15min for rest of the game with add. 30sec. starting from mv 1",
+        "105 minutes for first 40 moves and 15 minutes for the rest of the game",
+        "110 minutes for game with 10 sec increment from move 1",
+        "120 minutes for first 40 moves and 15 minutes for the rest of the game with 30sec. incr. from move 40",
+        "120 minutes for first 40 moves and 30 minutes for the rest of the game",
+        "120 minutes for first 40 moves and 30 minutes with 30 seconds increment from move 40",
+        "120 minutes for game",
+        "120 minutes for game with 30 seconds increment from move 1",
+        "150 minutes for the whole game",
+        "30 minutes for game with 30 seconds increment from move 1",
+        "40 minutes for game with 30 seconds increment from move 1",
+        "60 minutes for game",
+        "60 minutes for game with 30 seconds increment from move 1",
+        "65 minutes for game",
+        "70 minutes for game with 30 seconds increment from move 1",
+        "75 minutes with 30 seconds increment from move 1",
+        "90 minutes for first 40 moves and 15 minutes for the rest of the game with 30sec. increment from move 1",
+        "90 minutes for game with 10 seconds increment from move 1",
+        "90 minutes for the whole game",
+        "90 minutes with 30 seconds increment from move 1",
+        "90 min/40moves + 30 min/end +30sec increment per move starting from move 1"
+    ]
 };
 
 // =========================================================
@@ -589,10 +678,10 @@ auth.onAuthStateChanged(user => {
                 
                 // Route to correct dashboard & toggle the admin "Switch View" button
                 if(currentUserProfile.role === 'admin') {
-                    document.getElementById('btnGoAdminView').style.display = 'block'; // Unhides the return button for admins in org view
+                    document.getElementById('btnGoAdminView').style.display = 'block'; 
                     showView('admin');
                 } else {
-                    document.getElementById('btnGoAdminView').style.display = 'none'; // Keeps it hidden for regular organizers
+                    document.getElementById('btnGoAdminView').style.display = 'none'; 
                     showView('organizer-dash');
                 }
                 listenForDossiers(); 
@@ -717,6 +806,7 @@ function listenForDossiers() {
                 eventName: data.eventName || 'Untitled Event',
                 organizer: data.signName || 'Unknown Organizer',
                 organizerEmail: data.organizerEmail || '',
+                paymentRef: data.paymentRef || 'N/A', 
                 code: 'MCF-' + new Date().getFullYear() + '-PENDING',
                 state: data.venue || 'Not specified',
                 system: data.system || 'N/A',
@@ -832,6 +922,10 @@ function openDrawer(id){
         <div class="data-item"><span class="label">Email</span><span>${t.organizerEmail}</span></div>
         <div class="data-item"><span class="label">System</span><span>${t.system}</span></div>
         <div class="data-item"><span class="label">Fee Due</span><span>RM ${t.fee}</span></div>
+        <div class="data-item" style="grid-column: 1 / -1; background: #fff8eb; padding: 10px; border: 1px solid #e3b872; border-radius: 3px;">
+            <span class="label" style="color: #b9873f;">Bank Payment Reference</span>
+            <span style="font-family: var(--mono); font-weight: 600;">${t.paymentRef || 'N/A'}</span>
+        </div>
     </div>
     `;
     document.getElementById('drawerBack').classList.add('open');
@@ -1006,6 +1100,7 @@ document.getElementById('submitAppBtn').addEventListener('click', async function
         system: document.getElementById('system')?.value || 'Not specified',
         timeControl: state.timeControl,
         totalFee: computeFee().total,
+        paymentRef: document.getElementById('paymentRef')?.value || 'Pending Validation',
         chiefArbiter: document.getElementById('chiefArbiter')?.value || 'Not specified',
         signName: document.getElementById('signName')?.value || 'Not signed',
         organizerEmail: currentUserProfile.email,
@@ -1020,18 +1115,114 @@ document.getElementById('submitAppBtn').addEventListener('click', async function
     }
 });
 
-// Download PDF
+// Download PDF (Detailed View)
 document.getElementById('downloadBtn').addEventListener('click', function() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+    
+    // 1. GATHER DATA
     const eventName = document.getElementById('eventName').value || 'Untitled Event';
+    const venue = document.getElementById('venue').value || 'Not specified';
+    const pax = document.getElementById('pax').value || 'Not specified';
+    const dateStart = document.getElementById('dateStart').value || 'Not specified';
+    const dateEnd = document.getElementById('dateEnd').value || 'Not specified';
+    const system = document.getElementById('system').value || 'Not specified';
+    const rounds = document.getElementById('rounds') ? document.getElementById('rounds').value : 'Not specified';
+    const orgBody = document.getElementById('orgBody') ? document.getElementById('orgBody').value : 'Not specified';
+    const orgState = document.getElementById('orgState') ? document.getElementById('orgState').value : 'Not specified';
+    const chiefOrg = document.getElementById('chiefOrg') ? document.getElementById('chiefOrg').value : 'Not specified';
+    const chiefArbiter = document.getElementById('chiefArbiter') ? document.getElementById('chiefArbiter').value : 'Not specified';
+    const signName = document.getElementById('signName') ? document.getElementById('signName').value : 'Not signed';
+    const signDate = document.getElementById('signDate') ? document.getElementById('signDate').value : 'Not dated';
+    
+    const timeControlInfo = typeof state !== 'undefined' && state.timeControl ? state.timeControl : 'Not specified';
+    const feeInfo = typeof computeFee === 'function' ? 'RM ' + computeFee().total : 'Not calculated';
+    const dateToday = new Date().toLocaleDateString();
+
+    // 2. DRAW THE HEADER 
+    doc.setFillColor(21, 18, 13);
+    doc.rect(0, 0, 210, 45, 'F'); 
+    
+    doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("Event Details: " + eventName, 20, 20);
-    doc.setFontSize(12);
+    doc.setFontSize(22);
+    doc.text("MALAYSIAN CHESS FEDERATION", 105, 22, { align: "center" });
+    
+    doc.setTextColor(185, 135, 49); // Gold
     doc.setFont("helvetica", "normal");
-    doc.text("Organizer: " + (document.getElementById('signName').value || 'N/A'), 20, 30);
-    doc.text("Status: Submitted for Review", 20, 40);
+    doc.setFontSize(14);
+    doc.text("FIDE-Rated Event Application Summary", 105, 32, { align: "center" });
+
+    // 3. HELPER FUNCTIONS FOR CLEAN LAYOUT
+    let currentY = 55;
+    const labelX = 20;
+    const valueX = 75;
+
+    const drawSection = (title) => {
+        if (currentY > 260) { doc.addPage(); currentY = 20; } 
+        doc.setTextColor(40, 40, 40);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text(title, 20, currentY);
+        currentY += 3;
+        doc.setDrawColor(185, 135, 49); 
+        doc.setLineWidth(0.5);
+        doc.line(20, currentY, 190, currentY);
+        currentY += 10;
+    };
+
+    const printRow = (label, value) => {
+        if (currentY > 270) { doc.addPage(); currentY = 20; }
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.text(label + ":", labelX, currentY);
+        
+        doc.setFont("helvetica", "normal");
+        const splitValue = doc.splitTextToSize(value, 115); 
+        doc.text(splitValue, valueX, currentY);
+        currentY += (splitValue.length * 6) + 3; 
+    };
+
+    // 4. PRINT THE CONTENT SECTIONS
+    drawSection("Event Details");
+    printRow("Event Name", eventName);
+    printRow("Dates", `${dateStart} to ${dateEnd}`);
+    printRow("Venue", venue);
+    printRow("Tournament System", system);
+    printRow("Number of Rounds", rounds);
+    printRow("Expected Pax", pax.toString());
+    printRow("Time Control", timeControlInfo);
+    printRow("Total Fee Due", feeInfo);
+
+    currentY += 6; 
+
+    drawSection("Organizing Body & Officials");
+    printRow("Organizing Body", orgBody);
+    printRow("State", orgState);
+    printRow("Chief Organizer", chiefOrg);
+    printRow("Chief Arbiter", chiefArbiter);
+
+    currentY += 6;
+
+    drawSection("Declaration");
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(10);
+    doc.setTextColor(80, 80, 80);
+    doc.text("I hereby declare that the information provided in this dossier is true and accurate, and", 20, currentY);
+    currentY += 5;
+    doc.text("I agree to abide by the rules and regulations of the MCF and FIDE.", 20, currentY);
+    currentY += 10;
+    
+    doc.setTextColor(40, 40, 40);
+    printRow("Signed By", signName);
+    printRow("Date Signed", signDate);
+
+    // 5. FOOTER & DOWNLOAD
+    doc.setFontSize(9);
+    doc.setTextColor(150, 150, 150);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Officially generated via MCF Portal on ${dateToday}`, 105, 285, { align: "center" });
+
     doc.save(`MCF_Dossier_${eventName.replace(/\s+/g, '_')}.pdf`);
 });
 </script>
