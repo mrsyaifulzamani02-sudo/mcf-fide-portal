@@ -152,9 +152,9 @@
   .actions{ display:flex; justify-content:space-between; align-items:center; margin-top:36px; padding-top:20px; border-top:1px solid var(--line); }
   
   .btn{ font-family:var(--sans); font-weight:600; font-size:13.5px; padding:10px 18px; border-radius:var(--radius); border:1px solid transparent; cursor:pointer; }
-  .btn-primary{ background:var(--felt); color:var(--cream); }
+  .btn-primary{ background:var(--felt); color:var(--cream); border:1px solid var(--felt); }
   .btn-ghost{ background:transparent; color:var(--ink-soft); border-color:var(--line); }
-  .btn-gold{ background:var(--brass); color:var(--ink); }
+  .btn-gold{ background:var(--brass); color:var(--ink); border:1px solid var(--brass); }
   .btn-logout{ background:transparent; border:none; font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:rgba(244,239,226,0.55); cursor:pointer; padding:0; text-decoration:underline; }
   .btn-logout:hover{ color:var(--claret); }
 
@@ -181,14 +181,15 @@
   /* DRAWER */
   .drawer-back{ position:fixed; inset:0; background:rgba(21,18,13,0.55); display:none; justify-content:flex-end; z-index:200; }
   .drawer-back.open{ display:flex; }
-  .drawer{ background:var(--paper); width:580px; max-width:90vw; height:100vh; overflow-y:auto; border-left:1px solid var(--line); box-shadow:-10px 0 30px rgba(0,0,0,0.2); display:flex; flex-direction:column; }
+  .drawer{ background:var(--paper); width:640px; max-width:92vw; height:100vh; overflow-y:auto; border-left:1px solid var(--line); box-shadow:-10px 0 30px rgba(0,0,0,0.2); display:flex; flex-direction:column; }
   .drawer-head{ padding:20px 24px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:flex-start; background:var(--cream); position:sticky; top:0; z-index:10; }
   .drawer-head h3{ font-family:var(--serif); font-size:20px; margin:0 0 4px; }
   .drawer-close{ background:none; border:none; font-size:24px; cursor:pointer; color:var(--ink-soft); line-height:1; }
   .drawer-body{ padding:24px; flex:1; }
-  .section-title{ font-family:var(--serif); font-size:15px; color:var(--felt); margin:18px 0 8px; padding-bottom:4px; border-bottom:1px solid var(--line); }
-  .data-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; }
-  .data-item .label{ display:block; font-family:var(--mono); font-size:9.5px; text-transform:uppercase; color:rgba(58,53,44,0.55); }
+  .section-title{ font-family:var(--serif); font-size:14px; font-weight:600; color:var(--felt); margin:20px 0 10px; padding-bottom:5px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; }
+  .data-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px 16px; }
+  .data-item .label{ display:block; font-family:var(--mono); font-size:9.5px; text-transform:uppercase; letter-spacing:0.04em; color:rgba(58,53,44,0.6); margin-bottom:2px; }
+  .data-item span:not(.label){ font-size:13px; color:var(--ink); font-weight:500; }
   .drawer-footer{ padding:16px 24px; border-top:1px solid var(--line); background:var(--cream); display:flex; justify-content:space-between; position:sticky; bottom:0; }
 
   .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:var(--cream); padding:12px 20px; border-radius:var(--radius); font-size:13px; box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:all .3s ease; display:flex; align-items:center; gap:10px; z-index:300; }
@@ -247,10 +248,31 @@
           <input type="email" id="regEmail" placeholder="you@domain.com" required>
         </div>
         <div class="field">
+          <label>State / Region</label>
+          <select id="regState" required>
+            <option value="" disabled selected>Select a State / Region...</option>
+            <option value="Johor">Johor</option>
+            <option value="Kedah">Kedah</option>
+            <option value="Kelantan">Kelantan</option>
+            <option value="Melaka">Melaka</option>
+            <option value="Negeri Sembilan">Negeri Sembilan</option>
+            <option value="Pahang">Pahang</option>
+            <option value="Penang">Penang</option>
+            <option value="Perak">Perak</option>
+            <option value="Perlis">Perlis</option>
+            <option value="Sabah">Sabah</option>
+            <option value="Sarawak">Sarawak</option>
+            <option value="Selangor">Selangor</option>
+            <option value="Terengganu">Terengganu</option>
+            <option value="W.P. Kuala Lumpur">W.P. Kuala Lumpur</option>
+            <option value="W.P. Labuan">W.P. Labuan</option>
+            <option value="W.P. Putrajaya">W.P. Putrajaya</option>
+          </select>
+        </div>
+        <div class="field">
           <label>Password</label>
           <input type="password" id="regPass" placeholder="Minimum 6 characters" required>
         </div>
-        <!-- VULNERABILITY REMOVED: Users can no longer select "Admin" here. Default is Organizer. -->
         <button type="submit" class="btn-submit" style="margin-top:10px;">Register Account</button>
       </form>
     </main>
@@ -285,9 +307,24 @@
           <div class="field"><label>Full Name</label><input type="text" id="profName" required></div>
           <div class="field"><label>Phone Number</label><input type="tel" id="profPhone" placeholder="e.g. 0123456789"></div>
           <div class="field full"><label>Default State / Region</label>
-            <select id="profState">
-              <option value="">Select...</option>
-              <option>Kuala Lumpur</option><option>Selangor</option><option>Penang</option><option>Johor</option><option>Perak</option><option>Perlis</option><option>Negeri Sembilan</option><option>Kedah</option><option>Terengganu</option><option>Kelantan</option><option>Pahang</option>
+            <select id="profState" required>
+              <option value="" disabled selected>Select a State / Region...</option>
+              <option value="Johor">Johor</option>
+              <option value="Kedah">Kedah</option>
+              <option value="Kelantan">Kelantan</option>
+              <option value="Melaka">Melaka</option>
+              <option value="Negeri Sembilan">Negeri Sembilan</option>
+              <option value="Pahang">Pahang</option>
+              <option value="Penang">Penang</option>
+              <option value="Perak">Perak</option>
+              <option value="Perlis">Perlis</option>
+              <option value="Sabah">Sabah</option>
+              <option value="Sarawak">Sarawak</option>
+              <option value="Selangor">Selangor</option>
+              <option value="Terengganu">Terengganu</option>
+              <option value="W.P. Kuala Lumpur">W.P. Kuala Lumpur</option>
+              <option value="W.P. Labuan">W.P. Labuan</option>
+              <option value="W.P. Putrajaya">W.P. Putrajaya</option>
             </select>
           </div>
         </div>
@@ -314,13 +351,13 @@
     <p class="nav-label" style="margin-top: 30px;">My Events</p>
     <nav class="nav-list" id="navFilterOrg">
       <button class="nav-item active" data-filter="all">All Applications <span class="badge" id="cntOrgAll">0</span></button>
-      <button class="nav-item" data-filter="pending">Pending <span class="badge" id="cntOrgPending">0</span></button>
+      <button class="nav-item" data-filter="pending_state">Pending State <span class="badge" id="cntOrgPendingState">0</span></button>
+      <button class="nav-item" data-filter="pending_admin">Pending Admin <span class="badge" id="cntOrgPendingAdmin">0</span></button>
       <button class="nav-item" data-filter="approved">Approved <span class="badge" id="cntOrgApproved">0</span></button>
       <button class="nav-item" data-filter="revision">Revision Req. <span class="badge" id="cntOrgRevision">0</span></button>
     </nav>
     
     <div class="rail-foot" style="margin-top:auto; display:flex; flex-direction:column; gap:16px; width:100%;">
-      <!-- This button only shows up if the user is actually an Admin exploring the Organizer View -->
       <button type="button" class="btn btn-ghost" id="btnGoAdminView" style="display:none; width:100%; border-color:var(--brass); color:var(--brass);">← Switch to Admin View</button>
       
       <div style="display:flex; justify-content:space-between; width: 100%;">
@@ -369,7 +406,7 @@
       </dl>
     </div>
     <div class="rail-foot">
-      <button type="button" id="btnCancelWizard" class="btn-logout">← Back to Dashboard</button>
+      <button type="button" id="btnCancelWizard" class="btn-logout">← Cancel Application</button>
     </div>
   </aside>
 
@@ -397,6 +434,9 @@
         <section class="step" data-step="3">
           <div class="step-head"><p class="step-eyebrow">Section C</p><h2>Technical setup</h2></div>
           <div class="field-grid">
+            <div class="field full"><label>Pairing software</label>
+              <select id="software"><option>Swiss Manager</option><option>Vega</option><option>Tornelo</option><option>Other</option></select>
+            </div>
             <div class="field full"><label>1st tiebreak *</label><input type="text" id="tb1" placeholder="e.g. Buchholz Cut 1" value="Buchholz Cut 1"></div>
             <div class="field full"><label>2nd tiebreak</label><input type="text" id="tb2" placeholder="e.g. Buchholz"></div>
           </div>
@@ -409,7 +449,6 @@
             <div class="combo-panel" id="tcPanel"><div class="combo-search"><input type="text" id="tcSearch" placeholder="Search..."></div><div id="tcList"></div></div>
           </div>
         </section>
-        <!-- STEP 5: BUDGET & PAYMENT -->
         <section class="step" data-step="5">
           <div class="step-head"><p class="step-eyebrow">Section E</p><h2>Budget & Payment</h2></div>
           <div class="fee-box" id="feeCalc">
@@ -437,10 +476,31 @@
           <div class="step-head"><p class="step-eyebrow">Section F</p><h2>Officials</h2></div>
           <div class="field-grid">
             <div class="field full"><label>Organizing body *</label><input type="text" id="orgBody" placeholder="e.g. KL Chess Association"></div>
-            <div class="field full"><label>State *</label><select id="orgState"><option>Kuala Lumpur</option><option>Selangor</option><option>Penang</option><option>Johor</option><option>Perak</option><option>Perlis</option><option>Negeri Sembilan</option><option>Kedah</option><option>Terengganu</option><option>Kelantan</option><option>Pahang</option>
+            <div class="field full"><label>State *</label>
+            <select id="orgState" required>
+              <option value="" disabled selected>Select a State...</option>
+              <option value="Johor">Johor</option>
+              <option value="Kedah">Kedah</option>
+              <option value="Kelantan">Kelantan</option>
+              <option value="Melaka">Melaka</option>
+              <option value="Negeri Sembilan">Negeri Sembilan</option>
+              <option value="Pahang">Pahang</option>
+              <option value="Penang">Penang</option>
+              <option value="Perak">Perak</option>
+              <option value="Perlis">Perlis</option>
+              <option value="Sabah">Sabah</option>
+              <option value="Sarawak">Sarawak</option>
+              <option value="Selangor">Selangor</option>
+              <option value="Terengganu">Terengganu</option>
+              <option value="W.P. Kuala Lumpur">W.P. Kuala Lumpur</option>
+              <option value="W.P. Labuan">W.P. Labuan</option>
+              <option value="W.P. Putrajaya">W.P. Putrajaya</option>
             </select>
-            <div class="field"><label>Chief Organizer *</label><input type="text" id="chiefOrg" placeholder="Name"></div>
-            <div class="field"><label>Chief Arbiter *</label><input type="text" id="chiefArbiter" placeholder="Name"></div>
+            </div>
+            <div class="field full"><label>Chief Organizer *</label><input type="text" id="chiefOrg" placeholder="Name"></div>
+            <div class="field"><label>Chief Arbiter Name *</label><input type="text" id="chiefArbiter" placeholder="Name"></div>
+            <!-- NEW FIDE ID FIELD ADDED HERE -->
+            <div class="field"><label>Arbiter FIDE ID</label><input type="text" id="chiefArbiterFide" placeholder="e.g. 5012345"></div>
           </div>
         </section>
         <section class="step" data-step="7">
@@ -458,17 +518,11 @@
           <div class="step-head"><p class="step-eyebrow">Checkmate</p><h2>Review your dossier</h2></div>
           <div id="reviewOut"></div>
         </section>
-
-        <div id="successMessage" style="display: none; padding: 15px; background: var(--cream-2); border-left: 4px solid green; margin-top: 20px;">
-            <h3 style="color: var(--ink); margin: 0 0 5px 0;">Dossier Submitted Successfully!</h3>
-            <p style="margin: 0; color: var(--ink-soft);">Your event application has been securely recorded. You may now download your summary.</p>
-        </div>
         
         <div class="actions">
           <button type="button" class="btn btn-primary" id="submitAppBtn" style="display:none;">Submit Dossier</button>
           <button type="button" class="btn btn-ghost" id="backBtn">← Back</button>
           <div style="display:flex; gap:10px;">
-            <button type="button" class="btn btn-gold" id="downloadBtn" style="display:none;">Download PDF Summary</button>
             <button type="button" class="btn btn-primary" id="nextBtn">Continue →</button>
           </div>
         </div>
@@ -482,24 +536,27 @@
   <aside class="rail">
     <div class="crest">
       <div class="crest-mark"><span>MCF</span></div>
-      <div class="crest-text"><p class="eyebrow">Malaysian Chess Federation</p><h1>FIDE Admin Portal</h1></div>
+      <div class="crest-text"><p class="eyebrow" id="adminRoleEyebrow">Administration</p><h1>Admin Portal</h1></div>
     </div>
     <p class="nav-label">Queue Filter</p>
     <nav class="nav-list" id="navFilter">
       <button class="nav-item active" data-filter="all">All Applications <span class="badge" id="cntAll">0</span></button>
-      <button class="nav-item" data-filter="pending">Pending Review <span class="badge" id="cntPending">0</span></button>
+      <button class="nav-item" data-filter="pending_state">Pending State <span class="badge" id="cntPendingState">0</span></button>
+      <button class="nav-item" data-filter="pending_admin">Pending MCF <span class="badge" id="cntPendingAdmin">0</span></button>
       <button class="nav-item" data-filter="approved">Approved <span class="badge" id="cntApproved">0</span></button>
       <button class="nav-item" data-filter="revision">Revision Req. <span class="badge" id="cntRevision">0</span></button>
     </nav>
     
     <!-- SYSTEM ADMIN MENU -->
-    <p class="nav-label" style="margin-top: 16px;">System Admin</p>
-    <nav class="nav-list">
-      <button class="nav-item" id="btnNavUsers">Manage Users</button>
-    </nav>
+    <div id="systemAdminMenu" style="display:none;">
+        <p class="nav-label" style="margin-top: 16px;">System Admin</p>
+        <nav class="nav-list">
+        <button class="nav-item" id="btnNavUsers">Manage Users</button>
+        </nav>
+    </div>
 
     <div class="admin-stats">
-      <div class="stat-row"><span>Total Fees:</span><strong id="statFees">RM 0</strong></div>
+      <div class="stat-row"><span>Approved Fees:</span><strong id="statFees">RM 0</strong></div>
       <div class="stat-row"><span>Pending Action:</span><strong id="statAction">0 Events</strong></div>
     </div>
     
@@ -518,7 +575,7 @@
     <!-- APPLICATIONS VIEW -->
     <div id="adminAppsWrap">
       <div class="stage-header">
-        <div><h2 id="viewTitle">All Applications</h2><p>Review dossiers, check state endorsements, and assign FIDE rating approval.</p></div>
+        <div><h2 id="viewTitle">All Applications</h2><p>Review dossiers, check endorsements, and assign rating approval.</p></div>
         <div><input type="text" id="searchInput" placeholder="Search event or organizer..." style="width:240px;"></div>
       </div>
       <div class="table-wrap">
@@ -532,7 +589,7 @@
     <!-- USERS VIEW -->
     <div id="adminUsersWrap" style="display:none;">
       <div class="stage-header">
-        <div><h2>User Management</h2><p>View all registered users and manage administrator privileges.</p></div>
+        <div><h2>User Management</h2><p>View registered users and instantly assign State or Admin privileges.</p></div>
         <div><input type="text" id="searchUsers" placeholder="Search by name or email..." style="width:240px;"></div>
       </div>
       <div class="table-wrap">
@@ -554,12 +611,8 @@
       <button class="drawer-close" id="drawerClose">×</button>
     </div>
     <div class="drawer-body" id="drawerContent"></div>
-    <div class="drawer-footer">
-      <button class="btn btn-ghost" id="btnReject" style="color:var(--claret); border-color:var(--claret);">Reject</button>
-      <div style="display:flex; gap:10px;">
-        <button class="btn btn-gold" id="btnRevise">Request Revision</button>
-        <button class="btn btn-primary" id="btnApprove">Approve Event</button>
-      </div>
+    <div class="drawer-footer" id="drawerFooter">
+      <!-- Dynamic Buttons Injected Here -->
     </div>
   </div>
 </div>
@@ -593,7 +646,7 @@ const db = firebase.firestore();
 // !!! IMPORTANT: ADD YOUR REGISTRATION EMAIL HERE !!!
 // This automatically makes you the "Core Admin" when you log in.
 // =========================================================
-const CORE_ADMIN_EMAIL = "put-your-email-here@gmail.com"; 
+const CORE_ADMIN_EMAIL = "mrsyaifulzamani@yahoo.com"; 
 
 let applications = [];
 let usersList = [];
@@ -671,10 +724,20 @@ auth.onAuthStateChanged(user => {
                     currentUserProfile.role = 'core_admin';
                 }
                 
-                if(currentUserProfile.role === 'admin' || currentUserProfile.role === 'core_admin') {
+                // Route to correct dashboard 
+                if(currentUserProfile.role === 'admin' || currentUserProfile.role === 'core_admin' || currentUserProfile.role === 'state_admin') {
+                    
                     document.getElementById('btnGoAdminView').style.display = 'block'; 
+                    document.getElementById('adminRoleEyebrow').innerText = currentUserProfile.role === 'state_admin' ? (currentUserProfile.state + ' Association') : 'MCF Administration';
+                    
+                    if (currentUserProfile.role === 'core_admin') {
+                        document.getElementById('systemAdminMenu').style.display = 'block';
+                        listenForUsers();
+                    } else {
+                        document.getElementById('systemAdminMenu').style.display = 'none';
+                    }
+                    
                     showView('admin');
-                    listenForUsers(); // Fetch user list for the new table
                 } else {
                     document.getElementById('btnGoAdminView').style.display = 'none'; 
                     showView('organizer-dash');
@@ -698,16 +761,15 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     const name = document.getElementById('regName').value;
     const email = document.getElementById('regEmail').value;
     const pass = document.getElementById('regPass').value;
-    const role = "organizer"; // Default forced role
+    const stateInput = document.getElementById('regState').value;
+    const role = "organizer"; 
     const errEl = document.getElementById('regError');
-    
     try {
         errEl.style.display = 'none';
         document.getElementById('registerForm').querySelector('.btn-submit').textContent = "Creating...";
         const cred = await auth.createUserWithEmailAndPassword(email, pass);
-        // Save the email into the document data to allow admin querying later
         await db.collection('users').doc(cred.user.uid).set({ 
-            name: name, email: email.toLowerCase(), role: role, phone: "", state: "" 
+            name: name, email: email.toLowerCase(), role: role, phone: "", state: stateInput 
         });
         showToast("Account created successfully!");
     } catch (error) {
@@ -748,7 +810,6 @@ document.querySelectorAll('.btnLogOut').forEach(btn => {
 document.getElementById('btnGoOrgView')?.addEventListener('click', () => showView('organizer-dash'));
 document.getElementById('btnGoAdminView')?.addEventListener('click', () => showView('admin'));
 
-
 // =========================================================
 // 3. USER PROFILE MANAGEMENT
 // =========================================================
@@ -763,7 +824,7 @@ document.querySelectorAll('.btnGoProfile').forEach(btn => {
 });
 
 document.getElementById('btnBackFromProfile').addEventListener('click', () => {
-    if(currentUserProfile.role === 'admin' || currentUserProfile.role === 'core_admin') showView('admin');
+    if(currentUserProfile.role === 'admin' || currentUserProfile.role === 'core_admin' || currentUserProfile.role === 'state_admin') showView('admin');
     else showView('organizer-dash');
 });
 
@@ -792,12 +853,10 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
 // 4. DATA FETCHING & RENDERING (ADMIN & ORGANIZER)
 // =========================================================
 
-// --- A. USERS LIST (Admin Only) ---
 function listenForUsers() {
     db.collection("users").onSnapshot((snapshot) => {
         usersList = [];
         snapshot.forEach(doc => usersList.push({ id: doc.id, ...doc.data() }));
-        // Alphabetical sort by name
         usersList.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
         renderUsersTable();
     }, (error) => console.error("Error fetching users: ", error));
@@ -811,28 +870,27 @@ function renderUsersTable() {
     let filtered = usersList;
     if (searchUsersQ.trim() !== '') {
         const q = searchUsersQ.toLowerCase();
-        filtered = filtered.filter(u => 
-            (u.name || "").toLowerCase().includes(q) || 
-            (u.email || "").toLowerCase().includes(q)
-        );
+        filtered = filtered.filter(u => (u.name || "").toLowerCase().includes(q) || (u.email || "").toLowerCase().includes(q));
     }
     
     filtered.forEach(u => {
         const tr = document.createElement('tr');
-        
-        let roleBadge = 'ORGANIZER';
-        let badgeColor = 'var(--text-light)';
-        if (u.role === 'admin') { roleBadge = 'ADMIN'; badgeColor = 'orange'; }
+        let roleBadge = 'ORGANIZER', badgeColor = 'var(--text-light)';
+        if (u.role === 'state_admin') { roleBadge = 'STATE ADMIN'; badgeColor = '#b9873f'; }
+        if (u.role === 'admin') { roleBadge = 'MCF ADMIN'; badgeColor = '#0077b6'; }
         if (u.role === 'core_admin') { roleBadge = 'CORE ADMIN'; badgeColor = 'red'; }
 
-        // Action logic: Only Core Admin sees buttons. Cannot demote themselves.
-        let actionHtml = '';
+        let actionHtml = '-';
         if (currentUserProfile.role === 'core_admin' && u.email !== currentUserProfile.email) {
-            if (u.role === 'organizer') {
-                actionHtml = `<button class="btn btn-gold btnPromote" data-id="${u.id}" style="padding: 4px 8px; font-size: 11px;">Make Admin</button>`;
-            } else if (u.role === 'admin') {
-                actionHtml = `<button class="btn btn-ghost btnDemote" data-id="${u.id}" style="padding: 4px 8px; font-size: 11px; color:var(--claret); border-color:var(--claret);">Revoke Admin</button>`;
-            }
+            actionHtml = `
+            <div style="display:flex; gap:6px; align-items:center;">
+                <select class="role-select" id="role_${u.id}" style="padding:2px 4px; font-size:11px; border:1px solid var(--line); border-radius:3px;">
+                    <option value="organizer" ${u.role === 'organizer' ? 'selected' : ''}>Organizer</option>
+                    <option value="state_admin" ${u.role === 'state_admin' ? 'selected' : ''}>State Admin</option>
+                    <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>MCF Admin</option>
+                </select>
+                <button class="btn btn-gold btnChangeRole" data-id="${u.id}" style="padding: 3px 8px; font-size: 10px;">Save</button>
+            </div>`;
         }
 
         tr.innerHTML = `
@@ -840,28 +898,20 @@ function renderUsersTable() {
             <td>${u.email}</td>
             <td>${u.state || '-'}</td>
             <td><span style="background:${badgeColor}20; color:${badgeColor}; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold;">${roleBadge}</span></td>
-            <td>${actionHtml || '<span style="color:var(--ink-soft); font-size:12px;">-</span>'}</td>
+            <td>${actionHtml}</td>
         `;
         tbody.appendChild(tr);
     });
 
-    // Attach Action Listeners
-    document.querySelectorAll('.btnPromote').forEach(b => b.addEventListener('click', (e) => {
-        db.collection('users').doc(e.target.dataset.id).update({ role: 'admin' });
-        showToast("Promoted to Admin.");
-    }));
-    document.querySelectorAll('.btnDemote').forEach(b => b.addEventListener('click', (e) => {
-        db.collection('users').doc(e.target.dataset.id).update({ role: 'organizer' });
-        showToast("Admin access revoked.");
+    document.querySelectorAll('.btnChangeRole').forEach(b => b.addEventListener('click', (e) => {
+        const uid = e.target.dataset.id;
+        const newRole = document.getElementById(`role_${uid}`).value;
+        db.collection('users').doc(uid).update({ role: newRole });
+        showToast("User role updated successfully.");
     }));
 }
+document.getElementById('searchUsers').addEventListener('input', e => { searchUsersQ = e.target.value; renderUsersTable(); });
 
-document.getElementById('searchUsers').addEventListener('input', e => { 
-    searchUsersQ = e.target.value; 
-    renderUsersTable(); 
-});
-
-// Admin View Toggles
 document.getElementById('btnNavUsers').addEventListener('click', (e) => {
     document.querySelectorAll('#navFilter .nav-item').forEach(b => b.classList.remove('active'));
     e.target.classList.add('active');
@@ -874,7 +924,6 @@ document.querySelectorAll('#navFilter .nav-item').forEach(btn => {
         document.querySelectorAll('#navFilter .nav-item').forEach(b => b.classList.remove('active'));
         document.getElementById('btnNavUsers').classList.remove('active');
         btn.classList.add('active');
-        
         document.getElementById('adminAppsWrap').style.display = 'block';
         document.getElementById('adminUsersWrap').style.display = 'none';
         
@@ -884,26 +933,43 @@ document.querySelectorAll('#navFilter .nav-item').forEach(btn => {
     });
 });
 
-
 // --- B. DOSSIERS LIST ---
 function listenForDossiers() {
     db.collection("dossiers").orderBy("submittedAt", "desc").onSnapshot((snapshot) => {
         applications = []; 
         snapshot.forEach((doc) => {
             const data = doc.data();
+            let rawStatus = data.status || 'PENDING STATE';
+            if (rawStatus === 'PENDING') rawStatus = 'PENDING STATE'; // Backwards compatibility mapping
+
             applications.push({
                 id: doc.id,
                 eventName: data.eventName || 'Untitled Event',
+                venue: data.venue || 'Not specified',
+                state: data.state || 'Not specified',
+                pax: data.pax || 0,
+                startDate: data.startDate || '-',
+                endDate: data.endDate || '-',
+                system: data.system || 'N/A',
+                rounds: data.rounds || 'N/A',
+                maxRating: data.maxRating || 'Open',
+                software: data.software || 'N/A',
+                tb1: data.tb1 || 'Buchholz Cut 1',
+                tb2: data.tb2 || 'N/A',
+                timeControl: data.timeControl || 'N/A',
+                fee: data.totalFee || 0,
+                paymentRef: data.paymentRef || 'N/A',
+                orgBody: data.orgBody || 'N/A',
+                chiefOrg: data.chiefOrg || 'N/A',
+                chiefArbiter: data.chiefArbiter || 'N/A',
+                chiefArbiterFide: data.chiefArbiterFide || 'N/A',
+                obj1: data.obj1 || 'N/A',
+                signName: data.signName || 'Unknown Organizer',
+                signDate: data.signDate || '-',
                 organizer: data.signName || 'Unknown Organizer',
                 organizerEmail: data.organizerEmail || '',
-                paymentRef: data.paymentRef || 'N/A', 
                 code: 'MCF-' + new Date().getFullYear() + '-PENDING',
-                state: data.venue || 'Not specified',
-                system: data.system || 'N/A',
-                timeControl: data.timeControl || 'N/A',
-                pax: data.pax || 0,
-                fee: data.totalFee || 0,
-                status: data.status || 'PENDING'
+                status: rawStatus
             });
         });
         updateAdminCounts(); renderAdminTable();
@@ -913,17 +979,19 @@ function listenForDossiers() {
 
 // ADMIN DASHBOARD
 function updateAdminCounts() {
-    document.getElementById('cntAll').innerText = applications.length;
-    document.getElementById('cntPending').innerText = applications.filter(a => a.status === 'PENDING').length;
-    document.getElementById('cntApproved').innerText = applications.filter(a => a.status === 'APPROVED').length;
-    document.getElementById('cntRevision').innerText = applications.filter(a => a.status === 'REVISION REQ.').length;
+    let viewableApps = applications;
+    if (currentUserProfile.role === 'state_admin') {
+        viewableApps = applications.filter(a => a.state === currentUserProfile.state);
+    }
+
+    document.getElementById('cntAll').innerText = viewableApps.length;
+    document.getElementById('cntPendingState').innerText = viewableApps.filter(a => a.status === 'PENDING STATE').length;
+    document.getElementById('cntPendingAdmin').innerText = viewableApps.filter(a => a.status === 'PENDING ADMIN').length;
+    document.getElementById('cntApproved').innerText = viewableApps.filter(a => a.status === 'APPROVED').length;
+    document.getElementById('cntRevision').innerText = viewableApps.filter(a => a.status === 'REVISION REQ.').length;
     
-    // FILTER: Only sum fees for APPROVED applications
-    const totalFees = applications
-        .filter(a => a.status === 'APPROVED')
-        .reduce((sum, app) => sum + (Number(app.fee) || 0), 0);
-        
-    const pendingAction = applications.filter(a => a.status === 'PENDING').length;
+    const totalFees = viewableApps.filter(a => a.status === 'APPROVED').reduce((sum, app) => sum + (Number(app.fee) || 0), 0);
+    const pendingAction = viewableApps.filter(a => a.status === 'PENDING STATE' || a.status === 'PENDING ADMIN').length;
     document.getElementById('statFees').innerText = 'RM ' + totalFees;
     document.getElementById('statAction').innerText = pendingAction + ' Events';
 }
@@ -934,9 +1002,14 @@ function renderAdminTable() {
     tbody.innerHTML = '';
     
     let filtered = applications; 
+    if (currentUserProfile.role === 'state_admin') {
+        filtered = applications.filter(a => a.state === currentUserProfile.state);
+    }
+
     if (currentFilterAdmin !== 'all') {
-        let target = 'PENDING'; 
-        if (currentFilterAdmin === 'pending') target = 'PENDING';
+        let target = 'PENDING STATE'; 
+        if (currentFilterAdmin === 'pending_state') target = 'PENDING STATE';
+        if (currentFilterAdmin === 'pending_admin') target = 'PENDING ADMIN';
         if (currentFilterAdmin === 'approved') target = 'APPROVED';
         if (currentFilterAdmin === 'revision') target = 'REVISION REQ.';
         filtered = filtered.filter(a => a.status === target);
@@ -948,7 +1021,12 @@ function renderAdminTable() {
     
     filtered.forEach(app => {
         const tr = document.createElement('tr');
-        let badgeColor = app.status === 'PENDING' ? 'orange' : app.status === 'APPROVED' ? 'green' : 'red';
+        let badgeColor = 'var(--text-light)'; 
+        if (app.status === 'PENDING STATE') badgeColor = '#b9873f'; 
+        if (app.status === 'PENDING ADMIN') badgeColor = '#0077b6'; 
+        if (app.status === 'APPROVED') badgeColor = 'green';
+        if (app.status === 'REVISION REQ.' || app.status === 'REJECTED') badgeColor = 'red';
+
         tr.innerHTML = `
             <td><b style="font-family:var(--serif); font-size:15px;">${app.eventName}</b><br><span style="font-size:12px; color:var(--text-light);">${app.code} &bull; ${app.organizer}</span></td>
             <td>${app.state}</td>
@@ -967,7 +1045,8 @@ document.getElementById('searchInput').addEventListener('input', e => { searchQ 
 function updateOrgCounts() {
     const myApps = applications.filter(a => a.organizerEmail === currentUserProfile.email);
     document.getElementById('cntOrgAll').innerText = myApps.length;
-    document.getElementById('cntOrgPending').innerText = myApps.filter(a => a.status === 'PENDING').length;
+    document.getElementById('cntOrgPendingState').innerText = myApps.filter(a => a.status === 'PENDING STATE').length;
+    document.getElementById('cntOrgPendingAdmin').innerText = myApps.filter(a => a.status === 'PENDING ADMIN').length;
     document.getElementById('cntOrgApproved').innerText = myApps.filter(a => a.status === 'APPROVED').length;
     document.getElementById('cntOrgRevision').innerText = myApps.filter(a => a.status === 'REVISION REQ.').length;
 }
@@ -979,8 +1058,9 @@ function renderOrgTable() {
     
     let myApps = applications.filter(a => a.organizerEmail === currentUserProfile.email);
     if (currentFilterOrg !== 'all') {
-        let target = 'PENDING'; 
-        if (currentFilterOrg === 'pending') target = 'PENDING';
+        let target = 'PENDING STATE'; 
+        if (currentFilterOrg === 'pending_state') target = 'PENDING STATE';
+        if (currentFilterOrg === 'pending_admin') target = 'PENDING ADMIN';
         if (currentFilterOrg === 'approved') target = 'APPROVED';
         if (currentFilterOrg === 'revision') target = 'REVISION REQ.';
         myApps = myApps.filter(a => a.status === target);
@@ -988,7 +1068,12 @@ function renderOrgTable() {
     
     myApps.forEach(app => {
         const tr = document.createElement('tr');
-        let badgeColor = app.status === 'PENDING' ? 'orange' : app.status === 'APPROVED' ? 'green' : 'red';
+        let badgeColor = 'var(--text-light)'; 
+        if (app.status === 'PENDING STATE') badgeColor = '#b9873f'; 
+        if (app.status === 'PENDING ADMIN') badgeColor = '#0077b6'; 
+        if (app.status === 'APPROVED') badgeColor = 'green';
+        if (app.status === 'REVISION REQ.' || app.status === 'REJECTED') badgeColor = 'red';
+
         tr.innerHTML = `
             <td><b style="font-family:var(--serif); font-size:15px;">${app.eventName}</b><br><span style="font-size:12px; color:var(--text-light);">${app.code}</span></td>
             <td>${app.state}</td>
@@ -997,6 +1082,9 @@ function renderOrgTable() {
             <td><b>RM ${app.fee}</b></td>
             <td><span style="background: ${badgeColor}20; color: ${badgeColor}; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; letter-spacing: 0.5px;">${app.status}</span></td>
         `;
+        
+        // Add click listener for Organizer to view their own dossier!
+        tr.addEventListener('click', () => openDrawer(app.id));
         tbody.appendChild(tr);
     });
 }
@@ -1011,42 +1099,116 @@ document.querySelectorAll('#navFilterOrg .nav-item').forEach(btn => {
     });
 });
 
-// DRAWER (Admin Only)
+// DRAWER (Admin & Organizer View logic)
 function openDrawer(id){
     selectedId = id;
     const t = applications.find(x => x.id === id); 
     if(!t) return;
     document.getElementById('dTitle').textContent = t.eventName;
-    document.getElementById('dSubtitle').textContent = "ID: " + t.id;
+    document.getElementById('dSubtitle').textContent = "Application ID: #" + t.id;
+    
     document.getElementById('drawerContent').innerHTML = `
-    <div class="section-title">Event Overview</div>
-    <div class="data-grid">
-        <div class="data-item"><span class="label">Organizer</span><span>${t.organizer}</span></div>
-        <div class="data-item"><span class="label">Email</span><span>${t.organizerEmail}</span></div>
-        <div class="data-item"><span class="label">System</span><span>${t.system}</span></div>
-        <div class="data-item"><span class="label">Fee Due</span><span>RM ${t.fee}</span></div>
-        <div class="data-item" style="grid-column: 1 / -1; background: #fff8eb; padding: 10px; border: 1px solid #e3b872; border-radius: 3px;">
-            <span class="label" style="color: #b9873f;">Bank Payment Reference</span>
-            <span style="font-family: var(--mono); font-weight: 600;">${t.paymentRef || 'N/A'}</span>
+    <!-- 1. PAYMENT & REVIEW BANNER -->
+    <div style="background: #fff8eb; padding: 14px 16px; border: 1px solid #e3b872; border-radius: 3px; margin-bottom: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
+            <span style="font-family: var(--mono); font-size: 10px; text-transform: uppercase; color: #8a6018; letter-spacing: 0.08em; font-weight: 600;">Payment & Status Audit</span>
+            <span style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--felt); background: rgba(30,75,57,0.1); padding: 2px 6px; border-radius: 2px;">${t.status}</span>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div>
+                <span class="label" style="color: #8a6018; font-size:9.5px; font-family:var(--mono); text-transform:uppercase; display:block;">Bank Transaction Reference</span>
+                <b style="font-family: var(--mono); font-size: 14px; color: var(--ink);">${t.paymentRef || 'N/A'}</b>
+            </div>
+            <div>
+                <span class="label" style="color: #8a6018; font-size:9.5px; font-family:var(--mono); text-transform:uppercase; display:block;">Total Calculated Fee</span>
+                <b style="font-family: var(--serif); font-size: 16px; color: var(--felt);">RM ${t.fee}</b>
+            </div>
         </div>
     </div>
+
+    <!-- 2. EVENT & TOURNAMENT DETAILS -->
+    <div class="section-title"><span>Event Structure & Schedule</span></div>
+    <div class="data-grid">
+        <div class="data-item"><span class="label">State / Region</span><span>${t.state}</span></div>
+        <div class="data-item"><span class="label">Venue Location</span><span>${t.venue}</span></div>
+        <div class="data-item"><span class="label">Start Date</span><span>${t.startDate}</span></div>
+        <div class="data-item"><span class="label">End Date</span><span>${t.endDate}</span></div>
+        <div class="data-item"><span class="label">Pairing System</span><span>${t.system}</span></div>
+        <div class="data-item"><span class="label">Number of Rounds</span><span>${t.rounds} Rounds</span></div>
+        <div class="data-item"><span class="label">Expected Participants</span><span>${t.pax} Pax</span></div>
+        <div class="data-item"><span class="label">Rating Eligibility</span><span>${t.maxRating ? ('Max ' + t.maxRating) : 'Open Section'}</span></div>
+        <div class="data-item" style="grid-column: 1 / -1;"><span class="label">Time Control Specification</span><span>${t.timeControl}</span></div>
+    </div>
+
+    <!-- 3. OFFICIALS & TECHNICAL SETUP -->
+    <div class="section-title"><span>Officials & Technical Setup</span></div>
+    <div class="data-grid">
+        <div class="data-item"><span class="label">Organizing Body</span><span>${t.orgBody}</span></div>
+        <div class="data-item"><span class="label">Chief Organizer</span><span>${t.chiefOrg}</span></div>
+        <div class="data-item"><span class="label">Chief Arbiter Name</span><span>${t.chiefArbiter}</span></div>
+        <div class="data-item"><span class="label">Chief Arbiter FIDE ID</span><span>${t.chiefArbiterFide}</span></div>
+        <div class="data-item"><span class="label">Pairing Software</span><span>${t.software}</span></div>
+        <div class="data-item"><span class="label">1st Tiebreak Priority</span><span>${t.tb1}</span></div>
+        <div class="data-item" style="grid-column: 1 / -1;"><span class="label">2nd Tiebreak</span><span>${t.tb2 || 'None specified'}</span></div>
+    </div>
+
+    <!-- 4. APPLICANT DECLARATION & OBJECTIVES -->
+    <div class="section-title"><span>Applicant Undertaking</span></div>
+    <div class="data-grid">
+        <div class="data-item"><span class="label">Applicant Full Name</span><span>${t.signName}</span></div>
+        <div class="data-item"><span class="label">Registered Email</span><span>${t.organizerEmail}</span></div>
+        <div class="data-item"><span class="label">Declaration Date</span><span>${t.signDate}</span></div>
+        <div class="data-item" style="grid-column: 1 / -1;"><span class="label">Tournament Objective</span><span>${t.obj1}</span></div>
+    </div>
+    
+    <div style="margin-top: 24px; text-align: center;">
+        <button class="btn btn-ghost" onclick="generateDossierPDF('${t.id}')" style="width: 100%; border-style: dashed;">
+            📄 Download Official Summary PDF
+        </button>
+    </div>
     `;
+
+    // Dynamic Footer Action Buttons
+    let footerHtml = '';
+    
+    if (currentUserProfile.role === 'admin' || currentUserProfile.role === 'core_admin' || currentUserProfile.role === 'state_admin') {
+        footerHtml = `<button class="btn btn-ghost" onclick="changeStatus('REJECTED')" style="color:var(--claret); border-color:var(--claret);">Reject</button>
+                      <div style="display:flex; gap:10px;">
+                        <button class="btn btn-gold" onclick="changeStatus('REVISION REQ.')">Request Revision</button>`;
+        
+        if (currentUserProfile.role === 'state_admin') {
+            footerHtml += `<button class="btn btn-primary" onclick="changeStatus('PENDING ADMIN')">Endorse (State)</button>`;
+        } else {
+            footerHtml += `<button class="btn btn-primary" onclick="changeStatus('APPROVED')">Approve (MCF)</button>`;
+        }
+        footerHtml += `</div>`;
+    } else {
+        // Organizer Footer View (No approval buttons)
+        footerHtml = `<div style="width:100%; text-align:right;"><button class="btn btn-ghost" onclick="closeDrawer()">Close Window</button></div>`;
+    }
+    
+    document.getElementById('drawerFooter').innerHTML = footerHtml;
     document.getElementById('drawerBack').classList.add('open');
 }
+
 function closeDrawer(){ document.getElementById('drawerBack').classList.remove('open'); }
-function changeStatus(newStatus){
+
+window.changeStatus = function(newStatus){
     if(selectedId){
-        db.collection("dossiers").doc(selectedId).update({ status: newStatus.toUpperCase() })
-        .then(() => { showToast("Updated event to " + newStatus.toUpperCase()); closeDrawer(); })
+        db.collection("dossiers").doc(selectedId).update({ status: newStatus })
+        .then(() => { showToast("Updated event to " + newStatus); closeDrawer(); })
         .catch(e => console.error("Update failed:", e));
     }
 }
 document.getElementById('drawerClose').addEventListener('click', closeDrawer);
 document.getElementById('drawerBack').addEventListener('click', e => { if(e.target.id === 'drawerBack') closeDrawer(); });
-document.getElementById('btnApprove').addEventListener('click', () => changeStatus('APPROVED'));
-document.getElementById('btnReject').addEventListener('click', () => changeStatus('REJECTED'));
-document.getElementById('btnRevise').addEventListener('click', () => changeStatus('REVISION REQ.'));
 
+// PDF Generator Helper
+window.generateDossierPDF = function(id) {
+    const app = applications.find(x => x.id === id);
+    if (!app) return;
+    buildAndSavePDF(app);
+};
 
 // =========================================================
 // 5. WIZARD FORM LOGIC
@@ -1081,7 +1243,7 @@ function updateDossier() {
     document.getElementById('dVenue').textContent = document.getElementById('venue')?.value || "—";
     document.getElementById('dSystem').textContent = document.getElementById('system')?.value || "—";
     document.getElementById('dTC').textContent = state.timeControl || "—";
-    document.getElementById('dArbiter').textContent = document.getElementById('caName')?.value || "—";
+    document.getElementById('dArbiter').textContent = document.getElementById('chiefArbiter')?.value || "—";
     
     const fee = computeFee();
     const pax = parseInt(document.getElementById('pax')?.value) || 0;
@@ -1106,10 +1268,8 @@ function renderWizard(){
     document.getElementById('backBtn').style.visibility = stepIdx===0 ? "hidden" : "visible";
     document.getElementById('nextBtn').style.display = isRev ? "none" : "inline-block";
     document.getElementById('submitAppBtn').style.display = isRev ? "inline-block" : "none";
-    document.getElementById('downloadBtn').style.display = "none";
     
     if(isRev){
-        document.getElementById('successMessage').style.display = "none";
         document.getElementById('reviewOut').innerHTML = `
         <div style="background:var(--paper); padding:16px; border:1px solid var(--line); border-radius:3px;">
             <h3 style="margin:0 0 10px; font-family:var(--serif);">${document.getElementById('eventName').value || 'Untitled event'}</h3>
@@ -1152,7 +1312,7 @@ function showToast(msg){
 document.getElementById('btnNewAppDash').addEventListener('click', () => {
     stepIdx = 0;
     document.getElementById('signName').value = currentUserProfile.name || "";
-    document.getElementById('orgState').value = currentUserProfile.state || "Kuala Lumpur";
+    document.getElementById('orgState').value = currentUserProfile.state || "W.P. Kuala Lumpur";
     renderWizard();
     showView('organizer-wizard');
 });
@@ -1162,79 +1322,76 @@ document.addEventListener('click', e => { if(!e.target.closest('.combo')) docume
 document.getElementById('nextBtn').addEventListener('click', () => { if(stepIdx < steps.length-1){ stepIdx++; renderWizard(); } });
 document.getElementById('backBtn').addEventListener('click', () => { if(stepIdx > 0){ stepIdx--; renderWizard(); } });
 
-// DB Submission logic
+// DB Submission logic & AUTO-REDIRECT
 document.getElementById('submitAppBtn').addEventListener('click', async function() {
-    this.style.display = 'none';
-    document.getElementById('downloadBtn').style.display = 'inline-block';
-    document.getElementById('successMessage').style.display = 'block';
+    this.textContent = "Saving...";
+    this.disabled = true;
 
     const dossierData = {
         eventName: document.getElementById('eventName')?.value || 'Untitled',
         venue: document.getElementById('venue')?.value || 'Not specified',
+        state: document.getElementById('orgState')?.value || 'W.P. Kuala Lumpur',
         pax: parseInt(document.getElementById('pax')?.value) || 0,
         startDate: document.getElementById('dateStart')?.value || '',
         endDate: document.getElementById('dateEnd')?.value || '',
         system: document.getElementById('system')?.value || 'Not specified',
+        rounds: document.getElementById('rounds')?.value || '7',
+        maxRating: document.getElementById('maxRating')?.value || '',
+        software: document.getElementById('software')?.value || 'Swiss Manager',
+        tb1: document.getElementById('tb1')?.value || 'Buchholz Cut 1',
+        tb2: document.getElementById('tb2')?.value || '',
         timeControl: state.timeControl,
         totalFee: computeFee().total,
         paymentRef: document.getElementById('paymentRef')?.value || 'Pending Validation',
+        orgBody: document.getElementById('orgBody')?.value || 'Not specified',
+        chiefOrg: document.getElementById('chiefOrg')?.value || 'Not specified',
         chiefArbiter: document.getElementById('chiefArbiter')?.value || 'Not specified',
+        chiefArbiterFide: document.getElementById('chiefArbiterFide')?.value || 'Not specified',
+        obj1: document.getElementById('obj1')?.value || '',
         signName: document.getElementById('signName')?.value || 'Not signed',
+        signDate: document.getElementById('signDate')?.value || '',
         organizerEmail: currentUserProfile.email,
+        status: 'PENDING STATE', 
         submittedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
     try {
         await db.collection("dossiers").add(dossierData);
+        
+        // Reset form and auto-redirect back to dashboard
+        document.getElementById('wizard').reset();
+        this.textContent = "Submit Dossier";
+        this.disabled = false;
+        showToast("Application submitted successfully!");
+        showView('organizer-dash');
+        
     } catch (error) {
         console.error("Error saving dossier: ", error);
-        document.getElementById('successMessage').style.borderLeftColor = "red";
+        showToast("Error saving application. Try again.");
+        this.textContent = "Submit Dossier";
+        this.disabled = false;
     }
 });
 
-// Download PDF (Detailed View)
-document.getElementById('downloadBtn').addEventListener('click', function() {
+// Centralized PDF Generator
+function buildAndSavePDF(data) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    
-    // 1. GATHER DATA
-    const eventName = document.getElementById('eventName').value || 'Untitled Event';
-    const venue = document.getElementById('venue').value || 'Not specified';
-    const pax = document.getElementById('pax').value || 'Not specified';
-    const dateStart = document.getElementById('dateStart').value || 'Not specified';
-    const dateEnd = document.getElementById('dateEnd').value || 'Not specified';
-    const system = document.getElementById('system').value || 'Not specified';
-    const rounds = document.getElementById('rounds') ? document.getElementById('rounds').value : 'Not specified';
-    const orgBody = document.getElementById('orgBody') ? document.getElementById('orgBody').value : 'Not specified';
-    const orgState = document.getElementById('orgState') ? document.getElementById('orgState').value : 'Not specified';
-    const chiefOrg = document.getElementById('chiefOrg') ? document.getElementById('chiefOrg').value : 'Not specified';
-    const chiefArbiter = document.getElementById('chiefArbiter') ? document.getElementById('chiefArbiter').value : 'Not specified';
-    const signName = document.getElementById('signName') ? document.getElementById('signName').value : 'Not signed';
-    const signDate = document.getElementById('signDate') ? document.getElementById('signDate').value : 'Not dated';
-    
-    const timeControlInfo = typeof state !== 'undefined' && state.timeControl ? state.timeControl : 'Not specified';
-    const feeInfo = typeof computeFee === 'function' ? 'RM ' + computeFee().total : 'Not calculated';
-    const paymentRef = document.getElementById('paymentRef') ? document.getElementById('paymentRef').value : 'Not provided';
     const dateToday = new Date().toLocaleDateString();
 
-    // 2. DRAW THE HEADER 
     doc.setFillColor(21, 18, 13);
     doc.rect(0, 0, 210, 45, 'F'); 
-    
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
     doc.text("MALAYSIAN CHESS FEDERATION", 105, 22, { align: "center" });
-    
-    doc.setTextColor(185, 135, 49); // Gold
+    doc.setTextColor(185, 135, 49); 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(14);
     doc.text("FIDE-Rated Event Application Summary", 105, 32, { align: "center" });
 
-    // 3. HELPER FUNCTIONS FOR CLEAN LAYOUT
     let currentY = 55;
-    const labelX = 20;
-    const valueX = 75;
+    const labelX = 20, valueX = 75;
 
     const drawSection = (title) => {
         if (currentY > 260) { doc.addPage(); currentY = 20; } 
@@ -1254,35 +1411,31 @@ document.getElementById('downloadBtn').addEventListener('click', function() {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(10);
         doc.text(label + ":", labelX, currentY);
-        
         doc.setFont("helvetica", "normal");
-        const splitValue = doc.splitTextToSize(value, 115); 
+        const splitValue = doc.splitTextToSize(String(value || '-'), 115); 
         doc.text(splitValue, valueX, currentY);
         currentY += (splitValue.length * 6) + 3; 
     };
 
-    // 4. PRINT THE CONTENT SECTIONS
     drawSection("Event Details");
-    printRow("Event Name", eventName);
-    printRow("Dates", `${dateStart} to ${dateEnd}`);
-    printRow("Venue", venue);
-    printRow("Tournament System", system);
-    printRow("Number of Rounds", rounds);
-    printRow("Expected Pax", pax.toString());
-    printRow("Time Control", timeControlInfo);
-    printRow("Total Fee Due", feeInfo);
-    printRow("Payment Reference", paymentRef);
+    printRow("Event Name", data.eventName);
+    printRow("Dates", `${data.startDate} to ${data.endDate}`);
+    printRow("Venue", data.venue);
+    printRow("State / Region", data.state);
+    printRow("Tournament System", data.system);
+    printRow("Number of Rounds", data.rounds);
+    printRow("Expected Pax", data.pax.toString());
+    printRow("Time Control", data.timeControl);
+    printRow("Total Fee Due", 'RM ' + (data.totalFee || data.fee || 0));
+    printRow("Payment Reference", data.paymentRef);
 
     currentY += 6; 
-
     drawSection("Organizing Body & Officials");
-    printRow("Organizing Body", orgBody);
-    printRow("State", orgState);
-    printRow("Chief Organizer", chiefOrg);
-    printRow("Chief Arbiter", chiefArbiter);
+    printRow("Organizing Body", data.orgBody);
+    printRow("Chief Organizer", data.chiefOrg);
+    printRow("Chief Arbiter", data.chiefArbiter + (data.chiefArbiterFide ? ` (FIDE ID: ${data.chiefArbiterFide})` : ''));
 
     currentY += 6;
-
     drawSection("Declaration");
     doc.setFont("helvetica", "italic");
     doc.setFontSize(10);
@@ -1293,17 +1446,16 @@ document.getElementById('downloadBtn').addEventListener('click', function() {
     currentY += 10;
     
     doc.setTextColor(40, 40, 40);
-    printRow("Signed By", signName);
-    printRow("Date Signed", signDate);
+    printRow("Signed By", data.signName);
+    printRow("Date Signed", data.signDate);
 
-    // 5. FOOTER & DOWNLOAD
     doc.setFontSize(9);
     doc.setTextColor(150, 150, 150);
     doc.setFont("helvetica", "normal");
     doc.text(`Officially generated via MCF Portal on ${dateToday}`, 105, 285, { align: "center" });
 
-    doc.save(`MCF_Dossier_${eventName.replace(/\s+/g, '_')}.pdf`);
-});
+    doc.save(`MCF_Dossier_${(data.eventName || 'Event').replace(/\s+/g, '_')}.pdf`);
+}
 </script>
 
 </body>
